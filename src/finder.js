@@ -22,10 +22,73 @@
  */
 
 (function() {
-    'use strict';
+'use strict';
 
 const REQUEST_INTERVAL = 250;     // 250ms between requests, give BGA a break
 const CACHE_DURATION = 604800000; // One week in milliseconds
+
+let style = document.createElement('style');
+style.innerHTML = `
+  #bgaDuelFinderUi {
+  	position: fixed;
+  	left: -16px;
+  	bottom: -16px;
+  	margin: 1em 1em;
+  	min-width: 250px;
+  	max-height: 750px;
+  	padding: 10px;
+  	background: #f0f0f0;
+  	box-shadow: 0 3px 8px rgba(0,0,0,.3);
+  	z-index: 10000;
+  }
+  #finderDuelListTxt {
+  	display: block;
+		width: 100%;
+		height: 310px;
+  }
+  #buttonDiv {
+	 	display: flex;
+	 	justify-content: space-between;
+		margin-top: 1em;
+  }
+  #findButton, #backButton, #closeButton, #reloadButton {
+		margin: 0;
+	}
+	#backButton, #reloadButton {
+		display: none;
+	}
+	#gameList {
+		height: 100%;
+		max-height: 700px;
+		overflow-y: auto;
+	}
+	#gameList > h3.duelHeader:first-child {
+		margin-top: 0px;
+	}
+	h3.duelHeader {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 2px;
+		font-weight: normal;
+	}
+	h3.duelHeader > a {
+		text-decoration: none;
+	}
+	ol.resultlist > li {
+		display: inline;
+	}
+	ol.resultlist > li:not(:last-child)::after {
+		content: " • ";
+		color: #888;
+	}
+	li.result {
+		font-size: 0.8em;
+	}
+	span.win {
+		font-weight: bold;
+	}
+ `;
+document.head.appendChild(style);
 
 createUi();
 
@@ -64,91 +127,52 @@ function createUi() {
 
   ui = document.createElement("div");
   ui.id = uiId;
-  ui.style.position = 'fixed';
-  ui.style.left = "0";
-  ui.style.top = "0";
-  ui.style.margin = "1em 1em";
-  ui.style.width = "300px";
-  ui.style.height = "600px";
-  ui.style.padding = "15px";
-  ui.style.backgroundColor = "#eeefef";
-  ui.style.border = "2px solid black";
-  ui.style.boxShadow = "7px 7px #444";
-  ui.style.zIndex = "1000";
-  ui.style.color = "black";
 
-  const title = document.createElement("h2");
-  title.innerText = "BGA Duel Finder";
-
-  const gamePicker = document.createElement("select");
-  gamePicker.id = "finderGamePicker";
-  const optionsData = [
-      { value: 1, text: "Carcassonne" },
-      { value: 79, text: "Hive" },
-      { value: 1131, text: "7 Wonders" }
-  ];
-  optionsData.forEach(opt => {
-      const option = document.createElement("option");
-      option.value = opt.value;
-      option.textContent = opt.text;
-      gamePicker.appendChild(option);
-  });
-  const gamePickerLabel = document.createElement("label");
-  gamePickerLabel.htmlFor = "finderGamePicker";
-  gamePickerLabel.textContent = "Game: ";
-
+  const dateDiv = document.createElement("div");
+  dateDiv.id = "dateDiv";
   const datePicker = document.createElement("input");
   datePicker.id = "finderDatePicker";
   datePicker.type = "date";
-
+  datePicker.valueAsDate = new Date();
   const datePickerLabel = document.createElement("label");
   datePickerLabel.htmlFor = "finderDatePicker";
-  datePickerLabel.textContent = "Duels date: ";
+  datePickerLabel.textContent = "Date: ";
+  dateDiv.appendChild(datePickerLabel);
+  dateDiv.appendChild(datePicker);
 
   const textArea = document.createElement("textArea");
   textArea.id = "finderDuelListTxt";
-  textArea.style.display = "block";
-  textArea.style.width  = "100%";
-  textArea.style.height  = "75%";
   const textAreaLabel = document.createElement("label");
   textAreaLabel.htmlFor = "finderDuelListTxt";
-  textAreaLabel.textContent = "Duel list: ";
+  textAreaLabel.textContent = "Duels: ";
 
-  const button = document.createElement("a");
-  button.classList = "bgabutton bgabutton_blue";
-  button.style.position = "absolute";
-  button.style.right = "15px";
-  button.style.bottom = "0px";
-  button.innerText = "Find Duels";
-
+  const buttonDiv = document.createElement("div");
+  buttonDiv.id = "buttonDiv";
+  const findButton = document.createElement("a");
+  findButton.id = "findButton";
+  findButton.classList = "bgabutton bgabutton_blue";
+  findButton.innerText = "Find Duels";
   const backButton = document.createElement("a");
+  backButton.id = "backButton";
   backButton.classList = "bgabutton bgabutton_blue";
-  backButton.style.position = "absolute";
-  backButton.style.right = "15px";
-  backButton.style.bottom = "0px";
   backButton.innerText = "Back";
-  backButton.style.display = "none";
-
   const closeButton = document.createElement("a");
+  closeButton.id = "closeButton";
   closeButton.classList = "bgabutton bgabutton_red";
-  closeButton.style.position = "absolute";
-  closeButton.style.left = "15px";
-  closeButton.style.bottom = "0px";
   closeButton.innerText = "Close";
-  closeButton.style.display = "block";
+  const reloadButton = document.createElement("a");
+  reloadButton.id = "reloadButton";
+  reloadButton.classList = "bgabutton bgabutton_green";
+  reloadButton.innerText = "Reload";
+  buttonDiv.appendChild(findButton);
+  buttonDiv.appendChild(backButton);
+  buttonDiv.appendChild(closeButton);
+  buttonDiv.appendChild(reloadButton);
 
-  ui.appendChild(title);
-  ui.appendChild(gamePickerLabel);
-  ui.appendChild(gamePicker);
-  ui.appendChild(document.createElement("br"));
-  ui.appendChild(datePickerLabel);
-  ui.appendChild(datePicker);
-  ui.appendChild(document.createElement("br"));
+	ui.appendChild(dateDiv);
   ui.appendChild(textAreaLabel);
   ui.appendChild(textArea);
-  ui.appendChild(button);
-  ui.appendChild(backButton);
-  ui.appendChild(closeButton);
+  ui.appendChild(buttonDiv);
 
   document.body.appendChild(ui);
   let duelsDiv;
@@ -177,10 +201,10 @@ function createUi() {
 
     const pairs = [];
     for (let i = 0; i < lines.length; i += 3) {
-      const player1 = lines[i];
-      const player2 = lines[i + 2];
-      if (player1.trim() && player2.trim()) {
-        pairs.push(`${player1.trim()} vs ${player2.trim()}`);
+      const player0 = lines[i];
+      const player1 = lines[i + 2];
+      if (player0.trim() && player1.trim()) {
+        pairs.push(`${player0.trim()} vs ${player1.trim()}`);
       }
     }
     const transformedText = pairs.join('\n');
@@ -196,32 +220,50 @@ function createUi() {
     textArea.selectionStart = textArea.selectionEnd = start + transformedText.length;
   });
 
-  button.onclick = async function () {
-    const game_id = parseInt(gamePicker.value);
+  findButton.onclick = async function () {
+    const game_id = 1; // Carcassonne
     const date = new Date(datePicker.value);
     const unixTimestamp = Math.floor(date.getTime() / 1000);
     const duelsText = textArea.value;
     textArea.disabled = true;
-    button.disabled = true;
+    findButton.disabled = true;
     duelsDiv = await getAllDuels(duelsText, unixTimestamp, game_id);
 
     textArea.disabled = false;
-    button.disabled = false;
+    findButton.disabled = false;
+    dateDiv.style.display = "none";
     textArea.style.display = "none";
-    ui.appendChild(duelsDiv);
-    button.style.display = "none";
+    textAreaLabel.style.display = "none";
+    ui.insertBefore(duelsDiv, buttonDiv);
+    findButton.style.display = "none";
+    closeButton.style.display = "none";
     backButton.style.display = "block";
+    reloadButton.style.display = "block";
   };
 
   backButton.onclick = function () {
     textArea.style.display = "block";
+    textAreaLabel.style.display = "block";
+    dateDiv.style.display = "block";
     ui.removeChild(duelsDiv);
-    button.style.display = "block";
+    findButton.style.display = "block";
+    closeButton.style.display = "block";
     backButton.style.display = "none";
+    reloadButton.style.display = "none";
   };
 
   closeButton.onclick = function () {
     ui.style.display = "none";
+  }
+
+  reloadButton.onclick = async function () {
+  	const game_id = 1; // Carcassonne
+    const date = new Date(datePicker.value);
+    const unixTimestamp = Math.floor(date.getTime() / 1000);
+  	const duelsText = textArea.value;
+  	document.getElementById("gameList").remove();
+	  duelsDiv = await getAllDuels(duelsText, unixTimestamp, game_id);
+	  ui.insertBefore(duelsDiv, buttonDiv);
   }
 }
 
@@ -269,15 +311,15 @@ function getPlayerId(name) {
  * Return games for two players in a given day
  *
  */
-async function getGames(player1, player2, day, game_id) {
+async function getGames(player0, player1, day, game_id) {
   const tables = [];
   try {
+    const player0_id = getPlayerId(player0);
     const player1_id = getPlayerId(player1);
-    const player2_id = getPlayerId(player2);
     const params = {
       game_id: game_id,
-      player: player1_id,
-      opponent_id: player2_id,
+      player: player0_id,
+      opponent_id: player1_id,
       updateStats: 1
     };
     if (day) {
@@ -294,10 +336,18 @@ async function getGames(player1, player2, day, game_id) {
     });
     for (const table of response.results[0].data.tables) {
       const table_url = `https://boardgamearena.com/table?table=${table.table_id}`;
-      const table_scores = table.scores ? table.scores.split(",") : ["?", "?"];
       const table_players = table.players.split(",");
+      const table_scores = table.scores ? table.scores.split(",") : ["?", "?"];
+      const table_ranks = table.ranks ? table.ranks.split(",") : ["?", "?"];
       const table_date = new Date(table.start * 1000);
       let table_flags = "";
+      // if (table_scores[0] == table_scores[1]) {
+			// 	if (table_ranks[0] == 1) {
+			// 		table_scores[0] += "*";
+			// 	} else {
+			// 		table_scores[1] += "*";
+			// 	}
+			// }
       if (table.concede == 1) {
         table_flags += " 🏳️ ";
       }
@@ -308,39 +358,38 @@ async function getGames(player1, player2, day, game_id) {
       tables.push({
         id: table.table_id,
         url: table_url,
-        scores: (table_players[0] == player1_id)
-                  ? `${table_scores[0]} - ${table_scores[1]}`
-                  : `${table_scores[1]} - ${table_scores[0]}`,
+        score0: (table_players[0] == player0_id) ? `${table_scores[0]}` : `${table_scores[1]}`,
+        score1: (table_players[0] == player0_id) ? `${table_scores[1]}` : `${table_scores[0]}`,
+        rank0: (table_players[0] == player0_id) ? `${table_ranks[0]}` : `${table_ranks[1]}`,
         date: table_date.toISOString().substr(0, 16).replace("T", " "),
         timestamp: table.start,
         flags: table_flags
       });
     }
     tables.sort((a, b) => a.timestamp - b.timestamp);
-    let players_url = `https://boardgamearena.com/gamestats?player=${player1_id}&opponent_id=${player2_id}&game_id=${game_id}&finished=0`;
+    let players_url = `https://boardgamearena.com/gamestats?player=${player0_id}&opponent_id=${player1_id}&game_id=${game_id}&finished=0`;
     if (day) {
       players_url += `&start_date=${day}&end_date=${day + 86400}`;
     }
 
     if (!day || isToday(day)) {
-      const table = await getGameInProgress(player1_id, player2_id);
+      const table = await getGameInProgress(player0_id, player1_id);
       if (table) {
         tables.push({
           id: table.id,
           url: `https://boardgamearena.com/table?table=${table.id}`,
-          scores: `${table.progression}%`,
+          progress: `${table.progression}`,
           timestamp: table.gamestart,
-          date: (new Date(table.gamestart * 1000)).toISOString().substr(0, 16).replace("T", " "),
-          flags: " 🔥 "
+          date: (new Date(table.gamestart * 1000)).toISOString().substr(0, 16).replace("T", " ")
         });
       }
     }
     console.debug(`Got ${tables.length} tables`);
 
-    return { player1_id, player2_id, players_url, tables };
+    return { player0_id, player1_id, players_url, tables };
   }
   catch (error) {
-    console.error(`Couldnt get games for ${player1} - ${player2}: ${error}`);
+    console.error(`Couldnt get games for ${player0} - ${player1}: ${error}`);
     return {
       players_url: "#",
       tables: []
@@ -351,16 +400,17 @@ async function getGames(player1, player2, day, game_id) {
 /**
  * Return game in progress, if any, for the given players.
  */
-async function getGameInProgress(player1_id, player2_id) {
+async function getGameInProgress(player0_id, player1_id) {
+	console.debug("Searching for game in progress");
   const response = await dojo.xhrPost({
     url: "https://boardgamearena.com/tablemanager/tablemanager/tableinfos.html",
-    postData: `playerfilter=${player1_id}&turninfo=false&matchmakingtables=false`,
+    postData: `playerfilter=${player0_id}&turninfo=false&matchmakingtables=false`,
     handleAs: 'json',
     headers: { 'X-Request-Token': bgaConfig.requestToken }
   });
   for (const table of Object.values(response.data.tables)) {
     if (table.status === "play") {
-      const foundSecondPlayer = Object.keys(table.players).filter(id => id == player2_id);
+      const foundSecondPlayer = Object.keys(table.players).filter(id => id == player1_id);
       if (foundSecondPlayer.length > 0) {
         return table;
       }
@@ -375,8 +425,7 @@ async function sleep(ms) {
 
 async function getAllDuels(all_duels_txt, day, game_id) {
   const gameListDiv = document.createElement('div');
-  gameListDiv.style.height = "460px";
-  gameListDiv.style.overflowY = "auto";
+  gameListDiv.id = "gameList";
   const duels_txt = all_duels_txt.split("\n");
   const vsRegex = new RegExp(" vs ", 'i');
 
@@ -403,30 +452,77 @@ async function getAllDuels(all_duels_txt, day, game_id) {
     const games_data = await getGames(players[0], players[1], day, game_id);
     const games = games_data.tables;
 
-    // Add duel header info
-    const duelHeader = document.createElement("h3");
-    const duelLink = document.createElement("a");
     const duelGameList = document.createElement("ol");
-    duelLink.style.textDecoration = "none"
-    duelLink.innerText = `${players[0]} - ${players[1]}`;
-    duelLink.href = games_data.players_url;
-    gameListDiv.appendChild(duelHeader);
-    duelHeader.appendChild(duelLink);
-    gameListDiv.appendChild(duelGameList);
-
-    // Add games info
+  	if (isToday(day)) {
+    	duelGameList.classList.add("resultlist");
+    }
+    // Get games info
+    let wins = [0, 0];
     for (const game of games) {
       const liItem = document.createElement('li');
+      liItem.classList = "result";
       const gameLink = document.createElement('a');
-      liItem.innerText = day ? `${game.date.substring(11)}: ` : `${game.date}: `;
-      liItem.style.padding = "0.1em 0.2em";
+      // liItem.innerText = day ? `${game.date.substring(11)}: ` : `${game.date}: `;
+      liItem.innerText = isToday(day) ? `` : `${game.date}: `;
       gameLink.classList = "bga-link";
-      gameLink.innerText = game.scores;
+      if (game.progress) {
+				gameLink.innerHTML = `${game.progress}%`;
+			} else {
+				const span0 = document.createElement("span");
+				const span1 = document.createElement("span");
+				span0.innerText = game.score0;
+				span1.innerText = game.score1;
+				if (game.rank0 == 1) {
+					span0.classList = "win";
+					wins[0]++;
+				} else  {
+					span1.classList = "win";
+					wins[1]++;
+				}
+				gameLink.appendChild(span0);
+				gameLink.appendChild(document.createTextNode("-"));
+				gameLink.appendChild(span1);
+			}
       gameLink.href = game.url;
       liItem.appendChild(gameLink);
-      liItem.appendChild(document.createTextNode(game.flags));
+      if (game.flags) {
+      	liItem.appendChild(document.createTextNode(game.flags));
+      }
       duelGameList.appendChild(liItem);
     }
+    const duelHeader = document.createElement("h3");
+    duelHeader.classList = "duelHeader";
+
+    const duelLink = document.createElement("a");
+    const duelLink0 = document.createElement("span");
+    const duelLink1 = document.createElement("span");
+    duelLink.appendChild(duelLink0);
+		duelLink.appendChild(document.createTextNode(" - "));
+		duelLink.appendChild(duelLink1);
+    duelLink.href = games_data.players_url;
+    duelLink0.innerText = players[0];
+    duelLink1.innerText = players[1];
+
+		const duelScore = document.createElement("span");
+		const duelScore0 = document.createElement("span");
+		const duelScore1 = document.createElement("span");
+		duelScore.appendChild(duelScore0);
+		duelScore.appendChild(document.createTextNode("-"));
+		duelScore.appendChild(duelScore1);
+		duelScore0.innerText = wins[0];
+		duelScore1.innerText = wins[1];
+
+		if (wins[0] > wins[1]) {
+			duelLink0.classList = "win";
+			duelScore0.classList = "win";
+		} else if (wins[0] < wins[1]) {
+			duelLink1.classList = "win";
+			duelScore1.classList = "win";
+		}
+    duelHeader.appendChild(duelLink);
+		duelHeader.appendChild(duelScore);
+    gameListDiv.appendChild(duelHeader);
+    gameListDiv.appendChild(duelGameList);
   }
   return gameListDiv;
 }
