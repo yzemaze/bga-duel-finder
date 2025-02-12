@@ -15,6 +15,7 @@
  *     If gpd or dpm are left blank, they default to WTCOC-/CCL-standard:
  *     - games per duel: 3
  *     - duels per match: 5
+ *     Just leave team names blank if you only need to change gpd.
  *
  *     Multiple matches can be displayed, e.g.:
  *     - Date: 21-04-2024
@@ -529,38 +530,9 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			let vals = duel_txt.substring(1).split(",");
 			if (vals.length == 1) {
 	  		matchHeader.innerText = vals[0].trim();
+	  		gameListDiv.appendChild(matchHeader);
 	  	} else {
-	  		matchIndex = index;
-	  		teamWins = [0, 0];
-	  		const matchFixture = document.createElement("span");
-	  		matchFixture.classList.add("fixture");
-				const home = document.createElement("span");
-				const away = document.createElement("span");
-				home.id = `${matchIndex}-home`;
-				away.id = `${matchIndex}-away`;
-				matchFixture.appendChild(home);
-				matchFixture.appendChild(document.createTextNode(" – "));
-				matchFixture.appendChild(away);
-				home.innerText = vals[0].trim();
-				away.innerText = vals[1].trim();
-				matchHeader.appendChild(matchFixture);
-
-				const matchScore = document.createElement("span");
-				matchScore.classList.add("fixtureScore");
-				const homeTeamScore = document.createElement("span");
-				const awayTeamScore = document.createElement("span");
-				homeTeamScore.id = `${matchIndex}-homeScore`;
-				awayTeamScore.id = `${matchIndex}-awayScore`;
-
-				matchScore.appendChild(homeTeamScore);
-				matchScore.appendChild(document.createTextNode("-"));
-				matchScore.appendChild(awayTeamScore);
-				homeTeamScore.innerText = teamWins[0];
-				awayTeamScore.innerText = teamWins[1];
-				console.debug(`SCORES: ${homeTeamScore.innerText} – ${awayTeamScore.innerText}`);
-				matchHeader.appendChild(matchScore);
-
-		  	if (vals[2]) {
+	  		if (vals[2]) {
 		  		nGames = vals[2].trim();
 		  		console.debug(`Games: ${nGames}`);
 		  	}
@@ -568,8 +540,39 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 		  		nMatches = vals[3].trim();
 		  		console.debug(`Matches: ${nMatches}`);
 		  	}
+		  	if (vals[0] != "" && vals[1] != "") {
+		  		matchIndex = index;
+		  		teamWins = [0, 0];
+		  		const matchFixture = document.createElement("span");
+		  		matchFixture.classList.add("fixture");
+					const home = document.createElement("span");
+					const away = document.createElement("span");
+					home.id = `${matchIndex}-home`;
+					away.id = `${matchIndex}-away`;
+					matchFixture.appendChild(home);
+					matchFixture.appendChild(document.createTextNode(" – "));
+					matchFixture.appendChild(away);
+					home.innerText = vals[0].trim();
+					away.innerText = vals[1].trim();
+					matchHeader.appendChild(matchFixture);
+
+					const matchScore = document.createElement("span");
+					matchScore.classList.add("fixtureScore");
+					const homeTeamScore = document.createElement("span");
+					const awayTeamScore = document.createElement("span");
+					homeTeamScore.id = `${matchIndex}-homeScore`;
+					awayTeamScore.id = `${matchIndex}-awayScore`;
+
+					matchScore.appendChild(homeTeamScore);
+					matchScore.appendChild(document.createTextNode("-"));
+					matchScore.appendChild(awayTeamScore);
+					homeTeamScore.innerText = teamWins[0];
+					awayTeamScore.innerText = teamWins[1];
+					console.debug(`SCORES: ${homeTeamScore.innerText} – ${awayTeamScore.innerText}`);
+					matchHeader.appendChild(matchScore);
+					gameListDiv.appendChild(matchHeader);
+				}
 	  	}
-			gameListDiv.appendChild(matchHeader);
 		} else {
 			// Get players
 			let players = duel_txt.split(" - ");
