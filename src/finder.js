@@ -1,24 +1,41 @@
 /**
  * BGA Duel Finder 2
  *
- * Script to find duels from a list of players.
+ * Find and display duels from a list of fixtures.
+ * Highlight winnning scores, calculate duel and team match results.
  *
  * Usage:
  *  1. Copy and paste this code to the developer console
- *     (or put it as a bookmarklet https://caiorss.github.io/bookmarklet-maker/)
- *  2. Pick game, date, and introduce duel list. For example:
- *        Game: Carcassonne
- *        Date: 08/04/2024
- *        Duel list:
- *          estroncio - 71st
- *          texe1 - TheCreep74
- *          2020Rafa - DexterLogan
- *          MadCan - isloun
- *          Loku_elo - Tarakanov28
- *          oscaridis - Annenmay
- *          thePOC - Glinka
+ *     or use a bookmarklet https://caiorss.github.io/bookmarklet-maker/
+ *  2. Pick date and paste/edit duel list.
+ *     " - " or " vs " are valid separators between usernames.
+ *     Lines starting with # are treated as headers/comments between duels.
+ *     There are some configuration options (# and , are essential!):
+ *     #Team A,Team B,games per duel,duels per match
+ *     If gpd or dpm are left blank, they default to WTCOC-/CCL-standard:
+ *     - games per duel: 3
+ *     - duels per match: 5
  *
- *  3. Click 'Find Games'.
+ *     Multiple matches can be displayed, e.g.:
+ *     - Date: 21-04-2024
+ *     - Show date: blank/false
+ *     - Matches & duels:
+ *       #WTCOC 2024 Group D - Round 1
+ *       #Belgium,Peru
+ *       CraftyRaf vs Eymicienta04
+ *       JinaJina vs spakune
+ *       Carcharoth 9 vs Sparklehorsee-
+ *       Sicarius Lupus vs -Nari-
+ *       Nicedicer vs AndreeMC
+ *       #Germany,Vietnam
+ *       Meami vs portgard
+ *       Medusahope vs Wolf Ren
+ *       kostra vs Mùng0910
+ *       MeepleWizard vs Bii1208
+ *       Leuschi vs Wiseman from Arcadia
+ *
+ *  3. Click 'Find Duels'.
+ *  4. Drag (header only) and resize the box as you like.
  */
 
 (function() {
