@@ -1,5 +1,5 @@
 /**
- * BGA Duel Finder.
+ * BGA Duel Finder 2
  *
  * Script to find duels from a list of players.
  *
@@ -25,60 +25,76 @@
 'use strict';
 
 const REQUEST_INTERVAL = 250;     // 250ms between requests, give BGA a break
-const CACHE_DURATION = 604800000; // One week in milliseconds
+const CACHE_DURATION = 7*24*60*60*1000; // ms
 
 let style = document.createElement('style');
 style.innerHTML = `
-	#bgaDuelFinderUi {
-		position: fixed;
-		left: -16px;
-		bottom: -16px;
-		margin: 1em 1em;
+	.drag-handle {
+	  cursor: pointer;
+	}
+	.dragging{
+	  cursor: move !important;
+	}
+	#finderBox {
+		box-sizing: border-box;
+		display: grid;
+		grid-template-rows: max-content 1fr;
+		position: absolute;
+		left: 0px;
+		bottom: 0px;
 		min-width: 250px;
-		max-height: 850px;
-		padding: 10px;
+		height: 365px;
 		background: #f0f0f0;
 		box-shadow: 0 3px 8px rgba(0,0,0,.3);
+		border-radius: 8px;
 		z-index: 10000;
+	}
+	#finderBox * {
+		box-sizing: border-box;
+	}
+	#finderHead {
+		background: #4871b6;
+		color: #fff;
+		padding: 5px 10px;
+	}
+	#finderBody {
+		display: grid;
+		grid-template-rows: 1fr max-content;
+		grid-gap: 10px;
+		overflow: auto;
+		padding: 5px 10px 10px 10px;
 	}
 	#inputForm {
 		display: grid;
-		grid-template-columns: 1fr 60%;
-	}
-	#inputForm label {
-		cursor: pointer;
+		grid-template-rows: repeat(3, max-content) 1fr;
 	}
 	#inputForm input {
 		width: fit-content;
-		cursor: pointer;
+		border-radius: 5px;
 	}
 	#duelsConfig, #duelsConfigLabel {
 		grid-column: span 2;
 	}
-	#inputForm :not(textArea) {
-		cursor: pointer;
-	}
 	#duelsConfig {
-		display: block;
 		width: 100%;
-		height: 310px;
+		border-radius: 5px;
 	}
 	#buttonDiv {
-		display: flex;
-		justify-content: space-between;
-		margin-top: 1em;
+		display: grid;
+		grid-template-columns: max-content 1fr max-content;
 	}
 	#findButton, #backButton, #closeButton, #reloadButton {
 		margin: 0;
+	}
+	#closeButton, #reloadButton {
+		grid-column-start: 3;
 	}
 	#backButton, #reloadButton {
 		display: none;
 	}
 	#gameList {
 		display: none;
-		height: 100%;
-		max-height: 800px;
-		overflow-y: auto;
+		overflow: auto;
 	}
 	#gameList > h3.duelHeader:first-child {
 		margin-top: 0px;
@@ -145,15 +161,26 @@ function isToday(unixTimestamp) {
  *
  */
 function createUi() {
-	const uiId = "bgaDuelFinderUi";
-	let ui = document.getElementById(uiId);
-	if (ui) {
-		ui.style.display = "block";
+	const finderId = "finderBox";
+	let finderBox = document.getElementById(finderId);
+	if (finderBox) {
+		finderBox.style.display = "block";
 		return;
 	}
 
-	ui = document.createElement("div");
-	ui.id = uiId;
+	finderBox = document.createElement("div");
+	finderBox.id = finderId;
+	finderBox.setAttribute("data-draggable", true);
+	finderBox.setAttribute("data-resizable", true);
+	let finderHead = document.createElement("div");
+	finderHead.id = "finderHead";
+	finderHead.setAttribute("data-drag-handle", true);
+	finderHead.innerText = "Duel Finder 2";
+	finderHead.classList.add("drag-handle");
+	let finderBody = document.createElement("div");
+	finderBody.id = "finderBody";
+	finderBox.appendChild(finderHead);
+	finderBox.appendChild(finderBody);
 
 	const inputForm = document.createElement("form");
 	inputForm.id = "inputForm";
@@ -211,11 +238,11 @@ function createUi() {
 	buttonDiv.appendChild(closeButton);
 	buttonDiv.appendChild(reloadButton);
 
-	ui.appendChild(inputForm);
-	ui.appendChild(gameListDiv);
-	ui.appendChild(buttonDiv);
+	finderBody.appendChild(inputForm);
+	finderBody.appendChild(gameListDiv);
+	finderBody.appendChild(buttonDiv);
 
-	document.body.appendChild(ui);
+	document.body.appendChild(finderBox);
 
 	textArea.addEventListener("paste", (event) => {
 		// Just check if pasted text was in the form of:
@@ -290,7 +317,7 @@ function createUi() {
 	};
 
 	closeButton.onclick = function () {
-		ui.style.display = "none";
+		finderBox.style.display = "none";
 	}
 
 	reloadButton.onclick = async function () {
@@ -651,6 +678,57 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 		}
 	}
 	return true;
+}
+
+let dragEl;
+let dragHandleEl
+const lastPosition = {};
+
+setupResizable();
+setupDraggable();
+
+function setupDraggable(){
+  dragHandleEl = document.querySelector('[data-drag-handle]');
+  dragHandleEl.addEventListener('mousedown', dragStart);
+  dragHandleEl.addEventListener('mouseup', dragEnd);
+  dragHandleEl.addEventListener('mouseout', dragEnd);
+}
+
+function setupResizable(){
+  const resizeEl = document.querySelector('[data-resizable]');
+  resizeEl.style.setProperty('resize', 'both');
+  resizeEl.style.setProperty('overflow','hidden');
+}
+
+function dragStart(event){
+  dragEl = getDraggableAncestor(event.target);
+  dragEl.style.setProperty('position','absolute');
+  lastPosition.left = event.target.clientX;
+  lastPosition.top = event.target.clientY;
+  dragHandleEl.classList.add('dragging');
+  dragHandleEl.addEventListener('mousemove', dragMove);
+}
+
+function dragMove(event){
+  const dragElRect = dragEl.getBoundingClientRect();
+  const newLeft = dragElRect.left + event.clientX - lastPosition.left;
+  const newTop = dragElRect.top + event.clientY - lastPosition.top;
+  dragEl.style.setProperty('left', `${newLeft}px`);
+  dragEl.style.setProperty('top', `${newTop}px`);
+  lastPosition.left = event.clientX;
+  lastPosition.top = event.clientY;
+  window.getSelection().removeAllRanges();
+}
+
+function getDraggableAncestor(element){
+  if (element.getAttribute('data-draggable')) return element;
+  return getDraggableAncestor(element.parentElement);
+}
+
+function dragEnd(){
+  dragHandleEl.classList.remove('dragging');
+  dragHandleEl.removeEventListener('mousemove',dragMove);
+  dragEl = null;
 }
 
 })();
