@@ -41,7 +41,24 @@ style.innerHTML = `
 		box-shadow: 0 3px 8px rgba(0,0,0,.3);
 		z-index: 10000;
 	}
-	#finderDuelListTxt {
+	#inputForm {
+		display: grid;
+		grid-template-columns: 1fr 60%;
+	}
+	#inputForm label {
+		cursor: pointer;
+	}
+	#inputForm input {
+		width: fit-content;
+		cursor: pointer;
+	}
+	#duelsConfig, #duelsConfigLabel {
+		grid-column: span 2;
+	}
+	#inputForm :not(textArea) {
+		cursor: pointer;
+	}
+	#duelsConfig {
 		display: block;
 		width: 100%;
 		height: 310px;
@@ -131,23 +148,35 @@ function createUi() {
 	ui = document.createElement("div");
 	ui.id = uiId;
 
-	const dateDiv = document.createElement("div");
-	dateDiv.id = "dateDiv";
+	const inputForm = document.createElement("form");
+	inputForm.id = "inputForm";
 	const datePicker = document.createElement("input");
-	datePicker.id = "finderDatePicker";
+	datePicker.id = "datePicker";
 	datePicker.type = "date";
 	datePicker.valueAsDate = new Date();
 	const datePickerLabel = document.createElement("label");
-	datePickerLabel.htmlFor = "finderDatePicker";
-	datePickerLabel.textContent = "Date: ";
-	dateDiv.appendChild(datePickerLabel);
-	dateDiv.appendChild(datePicker);
-
+	datePickerLabel.htmlFor = "datePicker";
+	datePickerLabel.textContent = "Date";
+	const dateShow = document.createElement("input");
+	dateShow.type = "checkbox";
+	dateShow.id = "dateShow";
+	dateShow.checked = false;
+	const dateShowLabel = document.createElement("label");
+	dateShowLabel.htmlFor = "dateShow";
+	dateShowLabel.textContent = "Show dates";
 	const textArea = document.createElement("textArea");
-	textArea.id = "finderDuelListTxt";
+	textArea.id = "duelsConfig";
 	const textAreaLabel = document.createElement("label");
-	textAreaLabel.htmlFor = "finderDuelListTxt";
-	textAreaLabel.textContent = "Duels: ";
+	textAreaLabel.id = "duelsConfigLabel";
+	textAreaLabel.htmlFor = "duelsConfig";
+	textAreaLabel.textContent = "Matches & duels";
+
+	inputForm.appendChild(datePickerLabel);
+	inputForm.appendChild(datePicker);
+	inputForm.appendChild(dateShowLabel);
+	inputForm.appendChild(dateShow);
+	inputForm.appendChild(textAreaLabel);
+	inputForm.appendChild(textArea);
 
 	const gameListDiv = document.createElement('div');
 	gameListDiv.id = "gameList";
@@ -175,9 +204,7 @@ function createUi() {
 	buttonDiv.appendChild(closeButton);
 	buttonDiv.appendChild(reloadButton);
 
-	ui.appendChild(dateDiv);
-	ui.appendChild(textAreaLabel);
-	ui.appendChild(textArea);
+	ui.appendChild(inputForm);
 	ui.appendChild(gameListDiv);
 	ui.appendChild(buttonDiv);
 
@@ -235,11 +262,8 @@ function createUi() {
 		findButton.disabled = true;
 		await getAllDuels(duelsText, unixTimestamp, game_id);
 
-		textArea.disabled = false;
 		findButton.disabled = false;
-		dateDiv.style.display = "none";
-		textArea.style.display = "none";
-		textAreaLabel.style.display = "none";
+		inputForm.style.display = "none";
 		gameListDiv.style.display = "block";
 		findButton.style.display = "none";
 		closeButton.style.display = "none";
@@ -248,10 +272,9 @@ function createUi() {
 	};
 
 	backButton.onclick = function () {
-		textArea.style.display = "block";
-		textAreaLabel.style.display = "block";
-		dateDiv.style.display = "block";
+		inputForm.style.display = "grid";
 		gameListDiv.style.display = "none";
+		gameListDiv.innerHTML = "";
 		findButton.style.display = "block";
 		closeButton.style.display = "block";
 		backButton.style.display = "none";
@@ -430,6 +453,7 @@ async function sleep(ms) {
 }
 
 async function getAllDuels(all_duels_txt, day, game_id) {
+	const showDates = document.getElementById("dateShow").checked;
 	const gameListDiv = document.getElementById("gameList");
 	const duels_txt = all_duels_txt.split("\n");
 	const vsRegex = new RegExp(" vs ", 'i');
@@ -512,17 +536,20 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			const games = games_data.tables;
 
 			const duelGameList = document.createElement("ol");
-			if (isToday(day)) {
+			if (!showDates) {
 				duelGameList.classList.add("resultlist");
 			}
 			// Get games info
 			let wins = [0, 0];
 			for (const game of games) {
-				const liItem = document.createElement('li');
-				liItem.classList = "result";
+				const result = document.createElement('li');
+				result.classList = "result";
 				const gameLink = document.createElement('a');
-				// liItem.innerText = day ? `${game.date.substring(11)}: ` : `${game.date}: `;
-				liItem.innerText = isToday(day) ? `` : `${game.date}: `;
+				let dateText = ""
+				if (showDates) {
+					dateText = day ? game.date.substring(11) : game.date;
+				}
+				result.innerText = `${dateText} `;
 				gameLink.classList = "bga-link";
 				if (game.progress) {
 					gameLink.innerHTML = `${game.progress}%`;
@@ -543,11 +570,11 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 					gameLink.appendChild(awayScore);
 				}
 				gameLink.href = game.url;
-				liItem.appendChild(gameLink);
+				result.appendChild(gameLink);
 				if (game.flags) {
-					liItem.appendChild(document.createTextNode(game.flags));
+					result.appendChild(document.createTextNode(game.flags));
 				}
-				duelGameList.appendChild(liItem);
+				duelGameList.appendChild(result);
 			}
 			const duelHeader = document.createElement("h3");
 			duelHeader.classList = "duelHeader";
