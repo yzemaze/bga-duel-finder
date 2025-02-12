@@ -37,6 +37,7 @@
  *
  *  3. Click 'Find Duels'.
  *  4. Drag (header only) and resize the box as you like.
+ *  5. Doubleclick the header to toggle the layout.
  */
 
 (function() {
@@ -66,9 +67,31 @@ style.innerHTML = `
 		box-shadow: 0 3px 8px rgba(0,0,0,.3);
 		border-radius: 8px;
 		z-index: 10000;
+		resize: both;
+  	overflow: hidden;
 	}
 	#finderBox * {
 		box-sizing: border-box;
+	}
+	#finderBox.horizontal {
+		grid-auto-flow: column;
+		grid-template-columns: max-content 1fr max-content;
+  	grid-template-rows: none;
+	}
+	.horizontal #finderBody {
+  	grid-template-rows: none;
+	  grid-auto-flow: column;
+	  grid-template-columns: 1fr auto;
+	}
+	.horizontal #gameList {
+	  grid-auto-flow: column;
+	}
+	.horizontal .fixtureScore, .horizontal .duelScore {
+		grid-column-start: 2;
+	}
+	#finderBox h2, #finderBox h3 {
+		font-weight: normal;
+		margin: 0;
 	}
 	#finderHead {
 		background: #4871b6;
@@ -99,13 +122,13 @@ style.innerHTML = `
 	}
 	#buttonDiv {
 		display: grid;
-		grid-template-columns: max-content 1fr max-content;
+		grid-template-columns: max-content max-content;
+		grid-gap: 10px;
 	}
-	#findButton, #backButton, #closeButton, #reloadButton {
+	#buttonDiv .bgabutton {
 		margin: 0;
-	}
-	#closeButton, #reloadButton {
-		grid-column-start: 3;
+		height: fit-content;
+  	width: fit-content;
 	}
 	#backButton, #reloadButton {
 		display: none;
@@ -113,25 +136,30 @@ style.innerHTML = `
 	#gameList {
 		display: none;
 		overflow: auto;
-	}
-	#gameList > h3.duelHeader:first-child {
-		margin-top: 0px;
+		/*grid-template-rows: repeat(100, min-content);*/
+		grid-auto-rows: max-content;
+		grid-gap: 2px;
 	}
 	h2.matchHeader, h3.duelHeader {
-		display: flex;
-		justify-content: space-between;
-		font-weight: normal;
+	  display: grid;
+  	grid-template-columns: max-content 1fr;
+  	grid-template-rows: 1fr;
+		grid-gap: 0.4em;
 	}
-	h3.duelHeader {
-		margin-bottom: 2px;
+	#finderBox h2.matchHeader {
+		margin-bottom: 5px;
 	}
-	h3.duelHeader > a {
-		text-decoration: none;
+	.fixtureScore, .duelScore {
+		grid-column-start: 3;
 	}
-	ol.resultlist > li {
+	.duel {
+		display: grid;
+	  grid-template-rows: 1fr 1fr;
+	}
+	ul.resultlist > li {
 		display: inline;
 	}
-	ol.resultlist > li:not(:last-child)::after {
+	ul.resultlist > li:not(:last-child)::after {
 		content: " • ";
 		color: #888;
 	}
@@ -141,9 +169,6 @@ style.innerHTML = `
 	li.result span.resultDate {
 		font-size: 0.9em;
 		padding-right: 5px;
-	}
-	.duelScore {
-		padding-left: 5px;
 	}
 	span.win {
 		font-weight: bold;
@@ -182,7 +207,7 @@ function createUi() {
 	const finderId = "finderBox";
 	let finderBox = document.getElementById(finderId);
 	if (finderBox) {
-		finderBox.style.display = "block";
+		finderBox.style.display = "grid";
 		return;
 	}
 
@@ -190,7 +215,7 @@ function createUi() {
 	finderBox.id = finderId;
 	finderBox.setAttribute("data-draggable", true);
 	finderBox.setAttribute("data-resizable", true);
-	let finderHead = document.createElement("div");
+	let finderHead = document.createElement("h2");
 	finderHead.id = "finderHead";
 	finderHead.setAttribute("data-drag-handle", true);
 	finderHead.innerText = "Duel Finder 2";
@@ -230,8 +255,8 @@ function createUi() {
 	inputForm.appendChild(textAreaLabel);
 	inputForm.appendChild(textArea);
 
-	const gameListDiv = document.createElement('div');
-	gameListDiv.id = "gameList";
+	const gameList = document.createElement('ul');
+	gameList.id = "gameList";
 
 	const buttonDiv = document.createElement("div");
 	buttonDiv.id = "buttonDiv";
@@ -257,10 +282,11 @@ function createUi() {
 	buttonDiv.appendChild(reloadButton);
 
 	finderBody.appendChild(inputForm);
-	finderBody.appendChild(gameListDiv);
+	finderBody.appendChild(gameList);
 	finderBody.appendChild(buttonDiv);
 
 	document.body.appendChild(finderBox);
+	finderHead.ondblclick = function() { finderBox.classList.toggle("horizontal"); };
 
 	textArea.addEventListener("paste", (event) => {
 		// Just check if pasted text was in the form of:
@@ -316,7 +342,7 @@ function createUi() {
 
 		findButton.disabled = false;
 		inputForm.style.display = "none";
-		gameListDiv.style.display = "block";
+		gameList.style.display = "grid";
 		findButton.style.display = "none";
 		closeButton.style.display = "none";
 		backButton.style.display = "block";
@@ -325,8 +351,8 @@ function createUi() {
 
 	backButton.onclick = function () {
 		inputForm.style.display = "grid";
-		gameListDiv.style.display = "none";
-		gameListDiv.innerHTML = "";
+		gameList.style.display = "none";
+		gameList.innerHTML = "";
 		textArea.disabled = false;
 		findButton.style.display = "block";
 		closeButton.style.display = "block";
@@ -343,8 +369,8 @@ function createUi() {
 		const date = new Date(datePicker.value);
 		const unixTimestamp = Math.floor(date.getTime() / 1000);
 		const duelsText = textArea.value;
-		gameListDiv.style.display = "block";
-		gameListDiv.innerHTML = "";
+		gameList.style.display = "grid";
+		gameList.innerHTML = "";
 		await getAllDuels(duelsText, unixTimestamp, game_id);
 	}
 }
@@ -510,7 +536,7 @@ async function sleep(ms) {
 
 async function getAllDuels(all_duels_txt, day, game_id) {
 	const showDates = document.getElementById("dateShow").checked;
-	const gameListDiv = document.getElementById("gameList");
+	const gameList = document.getElementById("gameList");
 	const duels_txt = all_duels_txt.split("\n");
 	const vsRegex = new RegExp(" vs ", 'i');
 	let matchIndex = -1;
@@ -525,12 +551,12 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 
 		// Check for Comments
 		if (duel_txt.startsWith("#")) {
-			const matchHeader = document.createElement("h2");
-			matchHeader.classList = "matchHeader";
 			let vals = duel_txt.substring(1).split(",");
 			if (vals.length == 1) {
-	  		matchHeader.innerText = vals[0].trim();
-	  		gameListDiv.appendChild(matchHeader);
+				const comment = document.createElement("h2");
+				comment.classList = "comment";
+	  		comment.innerText = vals[0].trim();
+	  		gameList.appendChild(comment);
 	  	} else {
 	  		if (vals[2]) {
 		  		nGames = vals[2].trim();
@@ -541,6 +567,8 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 		  		console.debug(`Matches: ${nMatches}`);
 		  	}
 		  	if (vals[0] != "" && vals[1] != "") {
+					const matchHeader = document.createElement("h2");
+					matchHeader.classList = "matchHeader";
 		  		matchIndex = index;
 		  		teamWins = [0, 0];
 		  		const matchFixture = document.createElement("span");
@@ -570,7 +598,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 					awayTeamScore.innerText = teamWins[1];
 					console.debug(`SCORES: ${homeTeamScore.innerText} – ${awayTeamScore.innerText}`);
 					matchHeader.appendChild(matchScore);
-					gameListDiv.appendChild(matchHeader);
+					gameList.appendChild(matchHeader);
 				}
 	  	}
 		} else {
@@ -593,7 +621,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			const games_data = await getGames(players[0], players[1], day, game_id);
 			const games = games_data.tables;
 
-			const duelGameList = document.createElement("ol");
+			const duelGameList = document.createElement("ul");
 			if (!showDates) {
 				duelGameList.classList.add("resultlist");
 			}
@@ -643,6 +671,8 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 				}
 				duelGameList.appendChild(result);
 			}
+			const duel = document.createElement("li");
+			duel.classList = "duel";
 			const duelHeader = document.createElement("h3");
 			duelHeader.classList = "duelHeader";
 
@@ -693,8 +723,9 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			}
 			duelHeader.appendChild(duelLink);
 			duelHeader.appendChild(duelScore);
-			gameListDiv.appendChild(duelHeader);
-			gameListDiv.appendChild(duelGameList);
+			duel.appendChild(duelHeader);
+			duel.appendChild(duelGameList);
+			gameList.appendChild(duel);
 		}
 	}
 	return true;
@@ -704,7 +735,6 @@ let dragEl;
 let dragHandleEl
 const lastPosition = {};
 
-setupResizable();
 setupDraggable();
 
 function setupDraggable(){
@@ -712,12 +742,6 @@ function setupDraggable(){
   dragHandleEl.addEventListener('mousedown', dragStart);
   dragHandleEl.addEventListener('mouseup', dragEnd);
   dragHandleEl.addEventListener('mouseout', dragEnd);
-}
-
-function setupResizable(){
-  const resizeEl = document.querySelector('[data-resizable]');
-  resizeEl.style.setProperty('resize', 'both');
-  resizeEl.style.setProperty('overflow','hidden');
 }
 
 function dragStart(event){
