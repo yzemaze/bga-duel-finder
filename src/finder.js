@@ -58,6 +58,7 @@ style.innerHTML = `
 		display: none;
 	}
 	#gameList {
+		display: none;
 		height: 100%;
 		max-height: 700px;
 		overflow-y: auto;
@@ -148,6 +149,9 @@ function createUi() {
 	textAreaLabel.htmlFor = "finderDuelListTxt";
 	textAreaLabel.textContent = "Duels: ";
 
+	const gameListDiv = document.createElement('div');
+	gameListDiv.id = "gameList";
+
 	const buttonDiv = document.createElement("div");
 	buttonDiv.id = "buttonDiv";
 	const findButton = document.createElement("a");
@@ -174,10 +178,10 @@ function createUi() {
 	ui.appendChild(dateDiv);
 	ui.appendChild(textAreaLabel);
 	ui.appendChild(textArea);
+	ui.appendChild(gameListDiv);
 	ui.appendChild(buttonDiv);
 
 	document.body.appendChild(ui);
-	let duelsDiv;
 
 	textArea.addEventListener("paste", (event) => {
 		// Just check if pasted text was in the form of:
@@ -229,14 +233,14 @@ function createUi() {
 		const duelsText = textArea.value;
 		textArea.disabled = true;
 		findButton.disabled = true;
-		duelsDiv = await getAllDuels(duelsText, unixTimestamp, game_id);
+		await getAllDuels(duelsText, unixTimestamp, game_id);
 
 		textArea.disabled = false;
 		findButton.disabled = false;
 		dateDiv.style.display = "none";
 		textArea.style.display = "none";
 		textAreaLabel.style.display = "none";
-		ui.insertBefore(duelsDiv, buttonDiv);
+		gameListDiv.style.display = "block";
 		findButton.style.display = "none";
 		closeButton.style.display = "none";
 		backButton.style.display = "block";
@@ -247,7 +251,7 @@ function createUi() {
 		textArea.style.display = "block";
 		textAreaLabel.style.display = "block";
 		dateDiv.style.display = "block";
-		ui.removeChild(duelsDiv);
+		gameListDiv.style.display = "none";
 		findButton.style.display = "block";
 		closeButton.style.display = "block";
 		backButton.style.display = "none";
@@ -263,9 +267,9 @@ function createUi() {
 		const date = new Date(datePicker.value);
 		const unixTimestamp = Math.floor(date.getTime() / 1000);
 		const duelsText = textArea.value;
-		document.getElementById("gameList").remove();
-		duelsDiv = await getAllDuels(duelsText, unixTimestamp, game_id);
-		ui.insertBefore(duelsDiv, buttonDiv);
+		gameListDiv.style.display = "block";
+		gameListDiv.innerHTML = "";
+		await getAllDuels(duelsText, unixTimestamp, game_id);
 	}
 }
 
@@ -426,13 +430,13 @@ async function sleep(ms) {
 }
 
 async function getAllDuels(all_duels_txt, day, game_id) {
-	const gameListDiv = document.createElement('div');
-	gameListDiv.id = "gameList";
+	const gameListDiv = document.getElementById("gameList");
 	const duels_txt = all_duels_txt.split("\n");
 	const vsRegex = new RegExp(" vs ", 'i');
 	let matchIndex = -1;
 	let nMatches = 5;
 	let nGames = 3;
+	let teamWins = [0,0];
 
 	for (const [index, duel_txt] of duels_txt.entries()) {
 		if (!duel_txt) {
@@ -448,11 +452,13 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 	  		matchHeader.innerText = vals[0].trim();
 	  	} else {
 	  		matchIndex = index;
+	  		teamWins = [0, 0];
 	  		const matchFixture = document.createElement("span");
+	  		matchFixture.classList.add("fixture");
 				const home = document.createElement("span");
 				const away = document.createElement("span");
-				home.id = `match${index}-home`;
-				away.id = `match${index}-away`;
+				home.id = `${matchIndex}-home`;
+				away.id = `${matchIndex}-away`;
 				matchFixture.appendChild(home);
 				matchFixture.appendChild(document.createTextNode(" - "));
 				matchFixture.appendChild(away);
@@ -461,16 +467,18 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 				matchHeader.appendChild(matchFixture);
 
 				const matchScore = document.createElement("span");
-				const homeScore = document.createElement("span");
-				const awayScore = document.createElement("span");
-				homeScore.id = `match${index}-homeScore`;
-				awayScore.id = `match${index}-awayScore`;
+				matchScore.classList.add("fixtureScore");
+				const homeTeamScore = document.createElement("span");
+				const awayTeamScore = document.createElement("span");
+				homeTeamScore.id = `${matchIndex}-homeScore`;
+				awayTeamScore.id = `${matchIndex}-awayScore`;
 
-				matchScore.appendChild(homeScore);
+				matchScore.appendChild(homeTeamScore);
 				matchScore.appendChild(document.createTextNode("-"));
-				matchScore.appendChild(awayScore);
-				homeScore.innerText = 0;
-				awayScore.innerText = 0;
+				matchScore.appendChild(awayTeamScore);
+				homeTeamScore.innerText = teamWins[0];
+				awayTeamScore.innerText = teamWins[1];
+				console.debug(`SCORES: ${homeTeamScore.innerText} – ${awayTeamScore.innerText}`);
 				matchHeader.appendChild(matchScore);
 
 		  	if (vals[2]) {
@@ -563,12 +571,30 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			homeScore.innerText = wins[0];
 			awayScore.innerText = wins[1];
 
-			if (wins[0] > wins[1]) {
+			if (wins[0] >= nGames/2) {
 				duelHome.classList = "win";
 				homeScore.classList = "win";
-			} else if (wins[0] < wins[1]) {
+				if (matchIndex > -1) {
+					teamWins[0]++;
+					let homeTeamScoreEl = document.getElementById(`${matchIndex}-homeScore`);
+					homeTeamScoreEl.innerText = teamWins[0];
+					if (teamWins[0] >= nMatches/2) {
+						document.getElementById(`${matchIndex}-home`).classList.add("win");
+						homeTeamScoreEl.classList.add("win");
+					}
+				}
+			} else if (wins[1] >= nGames/2) {
 				duelAway.classList = "win";
 				awayScore.classList = "win";
+				if (matchIndex > -1) {
+					teamWins[1]++;
+					let awayTeamScoreEl = document.getElementById(`${matchIndex}-awayScore`);
+					awayTeamScoreEl.innerText = teamWins[1];
+					if (teamWins[1] >= nMatches/2) {
+						document.getElementById(`${matchIndex}-away`).classList.add("win");
+						awayTeamScoreEl.classList.add("win");
+					}
+				}
 			}
 			duelHeader.appendChild(duelLink);
 			duelHeader.appendChild(duelScore);
@@ -576,7 +602,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			gameListDiv.appendChild(duelGameList);
 		}
 	}
-	return gameListDiv;
+	return true;
 }
 
 })();
