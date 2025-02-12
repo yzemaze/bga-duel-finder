@@ -61,8 +61,10 @@ style.innerHTML = `
 		position: absolute;
 		left: 0px;
 		bottom: 0px;
+		width: max-content;
 		min-width: 250px;
-		height: 365px;
+		height: max-content;
+		min-height: 350px;
 		background: #f0f0f0;
 		box-shadow: 0 3px 8px rgba(0,0,0,.3);
 		border-radius: 8px;
@@ -77,6 +79,7 @@ style.innerHTML = `
 		grid-auto-flow: column;
 		grid-template-columns: max-content 1fr max-content;
   	grid-template-rows: none;
+		min-height: 62px;
 	}
 	.horizontal #finderBody {
   	grid-template-rows: none;
@@ -97,6 +100,7 @@ style.innerHTML = `
 		background: #4871b6;
 		color: #fff;
 		padding: 5px 10px;
+		user-select: none;
 	}
 	#finderBody {
 		display: grid;
@@ -286,7 +290,7 @@ function createUi() {
 	finderBody.appendChild(buttonDiv);
 
 	document.body.appendChild(finderBox);
-	finderHead.ondblclick = function() { finderBox.classList.toggle("horizontal"); };
+	finderHead.ondblclick = function() { changeBoxLayout(finderBox) };
 
 	textArea.addEventListener("paste", (event) => {
 		// Just check if pasted text was in the form of:
@@ -773,6 +777,22 @@ function dragEnd(){
   dragHandleEl.classList.remove('dragging');
   dragHandleEl.removeEventListener('mousemove',dragMove);
   dragEl = null;
+}
+
+function changeBoxLayout(el){
+	el.classList.toggle("horizontal");
+	if (el.classList.contains("horizontal")) {
+		el.style.width = "max-content";
+		el.style.width = `calc(${el.offsetWidth}px + 100px)`;
+		el.style.top = "0px";
+		el.style.bottom = "unset";
+		el.style.left = "176px";
+	} else {
+		el.style.width = "max-content";
+		el.style.top = "unset";
+		el.style.bottom = "0px";
+		el.style.left = "0px";
+	}
 }
 
 })();
