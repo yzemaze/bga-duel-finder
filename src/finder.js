@@ -35,7 +35,7 @@ style.innerHTML = `
 		bottom: -16px;
 		margin: 1em 1em;
 		min-width: 250px;
-		max-height: 750px;
+		max-height: 850px;
 		padding: 10px;
 		background: #f0f0f0;
 		box-shadow: 0 3px 8px rgba(0,0,0,.3);
@@ -77,7 +77,7 @@ style.innerHTML = `
 	#gameList {
 		display: none;
 		height: 100%;
-		max-height: 700px;
+		max-height: 800px;
 		overflow-y: auto;
 	}
 	#gameList > h3.duelHeader:first-child {
@@ -103,6 +103,13 @@ style.innerHTML = `
 	}
 	li.result {
 		font-size: 0.8em;
+	}
+	li.result span.resultDate {
+		font-size: 0.9em;
+		padding-right: 5px;
+	}
+	.duelScore {
+		padding-left: 5px;
 	}
 	span.win {
 		font-weight: bold;
@@ -275,6 +282,7 @@ function createUi() {
 		inputForm.style.display = "grid";
 		gameListDiv.style.display = "none";
 		gameListDiv.innerHTML = "";
+		textArea.disabled = false;
 		findButton.style.display = "block";
 		closeButton.style.display = "block";
 		backButton.style.display = "none";
@@ -368,7 +376,8 @@ async function getGames(player0, player1, day, game_id) {
 			const table_players = table.players.split(",");
 			const table_scores = table.scores ? table.scores.split(",") : ["?", "?"];
 			const table_ranks = table.ranks ? table.ranks.split(",") : ["?", "?"];
-			const table_date = new Date(table.start * 1000);
+			const table_start_date = new Date(table.start * 1000);
+			const table_end_date = new Date(table.end * 1000);
 			let table_flags = "";
 			// if (table_scores[0] == table_scores[1]) {
 			// 	if (table_ranks[0] == 1) {
@@ -390,7 +399,8 @@ async function getGames(player0, player1, day, game_id) {
 				score0: (table_players[0] == player0_id) ? `${table_scores[0]}` : `${table_scores[1]}`,
 				score1: (table_players[0] == player0_id) ? `${table_scores[1]}` : `${table_scores[0]}`,
 				rank0: (table_players[0] == player0_id) ? `${table_ranks[0]}` : `${table_ranks[1]}`,
-				date: table_date.toISOString().substr(0, 16).replace("T", " "),
+				startDate: table_start_date.toISOString().substr(0, 16).replace("T", " "),
+				endDate: table_end_date.toISOString().substr(0, 16).replace("T", " "),
 				timestamp: table.start,
 				flags: table_flags
 			});
@@ -409,7 +419,8 @@ async function getGames(player0, player1, day, game_id) {
 					url: `https://boardgamearena.com/table?table=${table.id}`,
 					progress: `${table.progression}`,
 					timestamp: table.gamestart,
-					date: (new Date(table.gamestart * 1000)).toISOString().substr(0, 16).replace("T", " ")
+					startDate: (new Date(table.gamestart * 1000)).toISOString().substr(0, 16).replace("T", " "),
+					endDate: `${(new Date(table.gamestart * 1000)).toISOString().substr(0, 10)} __:__`,
 				});
 			}
 		}
@@ -418,7 +429,7 @@ async function getGames(player0, player1, day, game_id) {
 		return { player0_id, player1_id, players_url, tables };
 	}
 	catch (error) {
-		console.error(`Couldnt get games for ${player0} - ${player1}: ${error}`);
+		console.error(`Couldnt get games for ${player0} – ${player1}: ${error}`);
 		return {
 			players_url: "#",
 			tables: []
@@ -484,7 +495,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 				home.id = `${matchIndex}-home`;
 				away.id = `${matchIndex}-away`;
 				matchFixture.appendChild(home);
-				matchFixture.appendChild(document.createTextNode(" - "));
+				matchFixture.appendChild(document.createTextNode(" – "));
 				matchFixture.appendChild(away);
 				home.innerText = vals[0].trim();
 				away.innerText = vals[1].trim();
@@ -545,11 +556,20 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 				const result = document.createElement('li');
 				result.classList = "result";
 				const gameLink = document.createElement('a');
+				const dateSpan = document.createElement("span");
+				dateSpan.classList.add("resultDate");
 				let dateText = ""
 				if (showDates) {
-					dateText = day ? game.date.substring(11) : game.date;
+					if (isToday(day)) {
+						dateText = `${game.startDate.substring(11)}–${game.endDate.substring(11)}`;
+					} else if (day || (game.startDate.substring(0,10) == game.endDate.substring(0,10))) {
+						dateText = `${game.startDate}–${game.endDate.substring(11)}`;
+					} else {
+						dateText = `${game.startDate}–${game.endDate}`;
+					}
+					dateSpan.innerText = `${dateText} `;
+					result.appendChild(dateSpan);
 				}
-				result.innerText = `${dateText} `;
 				gameLink.classList = "bga-link";
 				if (game.progress) {
 					gameLink.innerHTML = `${game.progress}%`;
@@ -583,13 +603,14 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			const duelHome = document.createElement("span");
 			const duelAway = document.createElement("span");
 			duelLink.appendChild(duelHome);
-			duelLink.appendChild(document.createTextNode(" - "));
+			duelLink.appendChild(document.createTextNode(" – "));
 			duelLink.appendChild(duelAway);
 			duelLink.href = games_data.players_url;
 			duelHome.innerText = players[0];
 			duelAway.innerText = players[1];
 
 			const duelScore = document.createElement("span");
+			duelScore.classList.add("duelScore");
 			const homeScore = document.createElement("span");
 			const awayScore = document.createElement("span");
 			duelScore.appendChild(homeScore);
@@ -598,7 +619,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			homeScore.innerText = wins[0];
 			awayScore.innerText = wins[1];
 
-			if (wins[0] >= nGames/2) {
+			if (wins[0] >= nGames/2 && wins[0] > wins[1]) {
 				duelHome.classList = "win";
 				homeScore.classList = "win";
 				if (matchIndex > -1) {
@@ -610,7 +631,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 						homeTeamScoreEl.classList.add("win");
 					}
 				}
-			} else if (wins[1] >= nGames/2) {
+			} else if (wins[1] >= nGames/2 && wins[1] > wins[0]) {
 				duelAway.classList = "win";
 				awayScore.classList = "win";
 				if (matchIndex > -1) {
