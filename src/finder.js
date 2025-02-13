@@ -45,6 +45,7 @@
 
 const REQUEST_INTERVAL = 250;     // 250ms between requests, give BGA a break
 const CACHE_DURATION = 7*24*60*60*1000; // ms
+const DATA_CACHE_DURATION = 2*60*60*1000;
 
 let style = document.createElement("style");
 style.innerHTML = `
@@ -292,7 +293,6 @@ function createUi() {
 
 	document.body.appendChild(finderBox);
 	applyBoxLayout(finderBox);
-	retrieveDataFromLocalStorage()
 
 	finderHead.ondblclick = function() { applyBoxLayout(finderBox, "toggle") };
 
@@ -395,6 +395,8 @@ function createUi() {
 		gameList.innerHTML = "";
 		await getAllDuels(duelsText, unixTimestamp, game_id);
 	}
+
+	retrieveDataFromLocalStorage();
 }
 
 /**
@@ -799,29 +801,32 @@ function dragEnd(){
 }
 
 function saveDataToLocalStorage() {
-	const datePickerValue = document.getElementById("datePicker").value;
-	const dateShowValue = document.getElementById("dateShow").checked;
-	const duelsConfigValue = document.getElementById("duelsConfig").value;
-	localStorage.setItem("datePicker", datePickerValue);
-	localStorage.setItem("dateShow", dateShowValue);
-	localStorage.setItem("duelsConfig", duelsConfigValue);
+	let dfData = new Map();
+	dfData.set("datePicker", document.getElementById("datePicker").value);
+	dfData.set("dateShow", document.getElementById("dateShow").checked);
+	dfData.set("duelsConfig", document.getElementById("duelsConfig").value);
+	dfData.set("lastSaved", Date.now());
+	localStorage.setItem("dfData", JSON.stringify([...dfData]));
 	console.debug("Data saved to localStorage");
 }
 
 function retrieveDataFromLocalStorage() {
-	const datePickerValue = localStorage.getItem("datePicker");
-	const dateShowValue = localStorage.getItem("dateShow");
-	const duelsConfigValue = localStorage.getItem("duelsConfig");
-	if (datePickerValue) {
-			document.getElementById("datePicker").value = datePickerValue;
+	const dfData = new Map(JSON.parse(localStorage.dfData));
+	if (dfData) {
+		document.getElementById("datePicker").value = dfData.get("datePicker");
+		document.getElementById("dateShow").checked = eval(dfData.get("dateShow"));
+		const duelData = dfData.get("duelsConfig") ?? "";
+		document.getElementById("duelsConfig").value = duelData;
+		console.debug("Data retrieved from localStorage");
+		const lastSaved = dfData.get("lastSaved");
+		if (Date.now() - lastSaved < DATA_CACHE_DURATION) {
+			console.debug("Reloading retrieved data")
+			document.getElementById("findButton").click();
+			applyBoxLayout();
+		}
+	} else {
+		console.debug("Could not retrieve data from localStorage");
 	}
-	if (dateShowValue) {
-			document.getElementById("dateShow").checked = eval(dateShowValue);
-	}
-	if (duelsConfigValue) {
-			document.getElementById("duelsConfig").value = duelsConfigValue;
-	}
-	console.debug("Data retrieved from localStorage");
 }
 
 function saveBoxLayoutToLocalStorage(box) {
@@ -833,10 +838,10 @@ function saveBoxLayoutToLocalStorage(box) {
 		dfBoxAttrs = new Map(JSON.parse(localStorage.dfBoxAttrs));
 	}
 	dfBoxAttrs.set(orientation, {
-		height: el.style.height,
-		width: el.style.width,
-		top: el.style.top,
-		left: el.style.left,
+		"height": el.style.height,
+		"width": el.style.width,
+		"top": el.style.top,
+		"left": el.style.left,
 	});
 	dfBoxAttrs.set("savedOrientation", orientation);
 	localStorage.setItem("dfBoxAttrs", JSON.stringify([...dfBoxAttrs]));
@@ -851,10 +856,13 @@ function applyBoxLayout(box, mode) {
 		orientation = el.classList.contains("horizontal") ? "h" : "v";
 	}	else if (["h", "v"].includes(mode)) {
 		orientation = mode;
-	} else {
+	} else if (localStorage.dfBoxAttrs) {
 		const dfBoxAttrs = new Map(JSON.parse(localStorage.dfBoxAttrs));
 		orientation = dfBoxAttrs.get("savedOrientation") ?? "v";
+	} else {
+		orientation = "v";
 	}
+	el.classList = orientation == "h" ? "horizontal" : "";
 	if (localStorage.dfBoxAttrs) {
 		const dfBoxAttrs = new Map(JSON.parse(localStorage.dfBoxAttrs));
 		el.style.height = dfBoxAttrs.get(orientation)["height"];
@@ -869,8 +877,8 @@ function applyBoxLayout(box, mode) {
 		el.style.bottom = "unset";
 		el.style.left = "176px";
 	} else {
-		el.style.width = "max-content";
 		el.style.height = "max-content";
+		el.style.width = "max-content";
 		el.style.top = "unset";
 		el.style.bottom = "0px";
 		el.style.left = "0px";
