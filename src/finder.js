@@ -292,6 +292,7 @@ function createUi() {
 
 	document.body.appendChild(finderBox);
 	applyBoxLayout(finderBox);
+	retrieveDataFromLocalStorage()
 
 	finderHead.ondblclick = function() { applyBoxLayout(finderBox, "toggle") };
 
@@ -358,6 +359,7 @@ function createUi() {
 		const duelsText = textArea.value;
 		textArea.disabled = true;
 		findButton.disabled = true;
+		saveDataToLocalStorage();
 		await getAllDuels(duelsText, unixTimestamp, game_id);
 
 		findButton.disabled = false;
@@ -798,7 +800,7 @@ function dragEnd(){
 
 function saveDataToLocalStorage() {
 	const datePickerValue = document.getElementById("datePicker").value;
-	const dateShowValue = document.getElementById("dateShow").value;
+	const dateShowValue = document.getElementById("dateShow").checked;
 	const duelsConfigValue = document.getElementById("duelsConfig").value;
 	localStorage.setItem("datePicker", datePickerValue);
 	localStorage.setItem("dateShow", dateShowValue);
@@ -814,7 +816,7 @@ function retrieveDataFromLocalStorage() {
 			document.getElementById("datePicker").value = datePickerValue;
 	}
 	if (dateShowValue) {
-			document.getElementById("dateShow").value = dateShowValue;
+			document.getElementById("dateShow").checked = eval(dateShowValue);
 	}
 	if (duelsConfigValue) {
 			document.getElementById("duelsConfig").value = duelsConfigValue;
