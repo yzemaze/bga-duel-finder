@@ -863,6 +863,8 @@ function applyBoxLayout(box, mode) {
 		orientation = "v";
 	}
 	el.classList = orientation == "h" ? "horizontal" : "";
+	const finderHead = document.getElementById("finderHead");
+	finderHead.innerText = orientation == "h" ? "DF2" : "Duel Finder 2";
 	if (localStorage.dfBoxAttrs) {
 		const dfBoxAttrs = new Map(JSON.parse(localStorage.dfBoxAttrs));
 		el.style.height = dfBoxAttrs.get(orientation)["height"];
