@@ -88,6 +88,7 @@ style.innerHTML = `
 	}
 	.horizontal #gameList {
 	  grid-auto-flow: column;
+		grid-gap: 10px;
 	}
 	.horizontal .fixtureScore, .horizontal .duelScore {
 		grid-column-start: 2;
@@ -779,9 +780,69 @@ function dragEnd(){
   dragEl = null;
 }
 
-function changeBoxLayout(el){
-	el.classList.toggle("horizontal");
-	if (el.classList.contains("horizontal")) {
+function saveDataToLocalStorage() {
+    const datePickerValue = document.getElementById("datePicker").value;
+    const dateShowValue = document.getElementById("dateShow").value;
+    const duelsConfigValue = document.getElementById("duelsConfig").value;
+    localStorage.setItem("datePicker", datePickerValue);
+    localStorage.setItem("dateShow", dateShowValue);
+    localStorage.setItem("duelsConfig", duelsConfigValue);
+    console.debug("Data saved to localStorage");
+}
+
+function retrieveDataFromLocalStorage() {
+    const datePickerValue = localStorage.getItem("datePicker");
+    const dateShowValue = localStorage.getItem("dateShow");
+    const duelsConfigValue = localStorage.getItem("duelsConfig");
+    if (datePickerValue) {
+        document.getElementById("datePicker").value = datePickerValue;
+    }
+    if (dateShowValue) {
+        document.getElementById("dateShow").value = dateShowValue;
+    }
+    if (duelsConfigValue) {
+        document.getElementById("duelsConfig").value = duelsConfigValue;
+    }
+    console.debug("Data retrieved from localStorage");
+}
+
+function saveBoxLayoutToLocalStorage(el) {
+	// const el = document.getElementById("finderBox");
+	const orientation = el.classList.contains("horizontal") ? "h" : "v";
+	let fbAttribs = new Map();
+	if (localStorage.fbAttribs) {
+		fbAttribs = new Map(JSON.parse(localStorage.fbAttribs));
+	}
+	fbAttribs.set(orientation, {
+		height: el.style.height,
+		width: el.style.width,
+		top: el.style.top,
+		left: el.style.left,
+	});
+	fbAttribs.set("savedOrientation", orientation);
+	localStorage.setItem("fbAttribs", JSON.stringify([...fbAttribs]));
+	console.debug("Layout saved to localStorage");
+}
+
+function applyBoxLayout(el, mode){
+	let orientation = "";
+	if (mode == "toggle") {
+		el.classList.toggle("horizontal");
+		orientation = el.classList.contains("horizontal") ? "h" : "v";
+	}	else if (["h", "v"].includes(mode)) {
+		orientation = mode;
+	} else {
+		const fbAttribs = new Map(JSON.parse(localStorage.fbAttribs));
+		orientation = fbAttribs.get("savedOrientation") ?? "v";
+	}
+	if (localStorage.fbAttribs) {
+		const fbAttribs = new Map(JSON.parse(localStorage.fbAttribs));
+		el.style.height = fbAttribs.get(orientation)["height"];
+		el.style.width = fbAttribs.get(orientation)["width"];
+		el.style.top = fbAttribs.get(orientation)["top"];
+		el.style.left = fbAttribs.get(orientation)["left"];
+	} else if (orientation == "h") {
+		el.style.height = "62px";
 		el.style.width = "max-content";
 		el.style.width = `calc(${el.offsetWidth}px + 100px)`;
 		el.style.top = "0px";
@@ -789,6 +850,7 @@ function changeBoxLayout(el){
 		el.style.left = "176px";
 	} else {
 		el.style.width = "max-content";
+		el.style.height = "max-content";
 		el.style.top = "unset";
 		el.style.bottom = "0px";
 		el.style.left = "0px";
