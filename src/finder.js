@@ -523,6 +523,7 @@ async function getGames(player0, player1, day, game_id) {
 					timestamp: table.gamestart,
 					startDate: (new Date(table.gamestart * 1000)).toISOString().substr(0, 16).replace("T", " "),
 					endDate: `${(new Date(table.gamestart * 1000)).toISOString().substr(0, 10)} __:__`,
+					flags: " 🔥 "
 				});
 			}
 		}
