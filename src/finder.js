@@ -82,10 +82,14 @@ style.innerHTML = `
 		grid-template-rows: none;
 		min-height: 62px;
 	}
+	.horizontal #finderHead {
+		padding: 10px;
+	}
 	.horizontal #finderBody {
 		grid-template-rows: none;
 		grid-auto-flow: column;
 		grid-template-columns: 1fr auto;
+	  padding: 10px;
 	}
 	.horizontal #gameList {
 		grid-auto-flow: column;
@@ -100,7 +104,7 @@ style.innerHTML = `
 	.horizontal .fixtureScore, .horizontal .duelScore {
 		grid-column-start: 2;
 	}
-	#finderBox h2, #finderBox h3 {
+	#finderBox h2 {
 		font-weight: normal;
 		margin: 0;
 	}
@@ -152,13 +156,13 @@ style.innerHTML = `
 		grid-auto-rows: max-content;
 		grid-gap: 2px;
 	}
-	h2.matchHeader, h3.duelHeader {
+	.matchHeader, .duelHeader {
 		display: grid;
 		grid-template-columns: max-content 1fr;
 		grid-template-rows: 1fr;
 		grid-gap: 0.4em;
 	}
-	#finderBox h2.matchHeader {
+	#finderBox .matchHeader {
 		margin: 10px 0 5px 0;
 	}
 	.fixtureScore, .duelScore {
@@ -174,9 +178,6 @@ style.innerHTML = `
 	ul.resultlist > li:not(:last-child)::after {
 		content: " • ";
 		color: #888;
-	}
-	li.result {
-		font-size: 0.8em;
 	}
 	li.result span.resultDate {
 		font-size: 0.9em;
@@ -703,7 +704,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			}
 			const duel = document.createElement("li");
 			duel.classList = "duel";
-			const duelHeader = document.createElement("h3");
+			const duelHeader = document.createElement("h2");
 			duelHeader.classList = "duelHeader";
 
 			const duelLink = document.createElement("a");
