@@ -63,9 +63,9 @@ style.innerHTML = `
 		left: 0px;
 		bottom: 0px;
 		width: max-content;
-		min-width: 250px;
+		min-width: 210px;
 		height: max-content;
-		min-height: 350px;
+		min-height: 110px;
 		background: #f0f0f0;
 		box-shadow: 0 3px 8px rgba(0,0,0,.3);
 		border-radius: 8px;
@@ -90,6 +90,12 @@ style.innerHTML = `
 	.horizontal #gameList {
 		grid-auto-flow: column;
 		grid-gap: 10px;
+	}
+	#finderBox.horizontal h2.matchHeader {
+		margin: 0;
+	}
+	.horizontal .comment {
+		min-width: 10em;
 	}
 	.horizontal .fixtureScore, .horizontal .duelScore {
 		grid-column-start: 2;
@@ -153,14 +159,14 @@ style.innerHTML = `
 		grid-gap: 0.4em;
 	}
 	#finderBox h2.matchHeader {
-		margin-bottom: 5px;
+		margin: 10px 0 5px 0;
 	}
 	.fixtureScore, .duelScore {
 		grid-column-start: 3;
 	}
 	.duel {
 		display: grid;
-		grid-template-rows: 1fr 1fr;
+		grid-template-rows: max-content 1fr;
 	}
 	ul.resultlist > li {
 		display: inline;
