@@ -49,10 +49,10 @@ const CACHE_DURATION = 7*24*60*60*1000; // ms
 let style = document.createElement("style");
 style.innerHTML = `
 	.drag-handle {
-	  cursor: pointer;
+		cursor: pointer;
 	}
 	.dragging{
-	  cursor: move !important;
+		cursor: move !important;
 	}
 	#finderBox {
 		box-sizing: border-box;
@@ -70,7 +70,7 @@ style.innerHTML = `
 		border-radius: 8px;
 		z-index: 10000;
 		resize: both;
-  	overflow: hidden;
+		overflow: hidden;
 	}
 	#finderBox * {
 		box-sizing: border-box;
@@ -78,16 +78,16 @@ style.innerHTML = `
 	#finderBox.horizontal {
 		grid-auto-flow: column;
 		grid-template-columns: max-content 1fr max-content;
-  	grid-template-rows: none;
+		grid-template-rows: none;
 		min-height: 62px;
 	}
 	.horizontal #finderBody {
-  	grid-template-rows: none;
-	  grid-auto-flow: column;
-	  grid-template-columns: 1fr auto;
+		grid-template-rows: none;
+		grid-auto-flow: column;
+		grid-template-columns: 1fr auto;
 	}
 	.horizontal #gameList {
-	  grid-auto-flow: column;
+		grid-auto-flow: column;
 		grid-gap: 10px;
 	}
 	.horizontal .fixtureScore, .horizontal .duelScore {
@@ -133,7 +133,7 @@ style.innerHTML = `
 	#buttonDiv .bgabutton {
 		margin: 0;
 		height: fit-content;
-  	width: fit-content;
+		width: fit-content;
 	}
 	#backButton, #reloadButton {
 		display: none;
@@ -146,9 +146,9 @@ style.innerHTML = `
 		grid-gap: 2px;
 	}
 	h2.matchHeader, h3.duelHeader {
-	  display: grid;
-  	grid-template-columns: max-content 1fr;
-  	grid-template-rows: 1fr;
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		grid-template-rows: 1fr;
 		grid-gap: 0.4em;
 	}
 	#finderBox h2.matchHeader {
@@ -159,7 +159,7 @@ style.innerHTML = `
 	}
 	.duel {
 		display: grid;
-	  grid-template-rows: 1fr 1fr;
+		grid-template-rows: 1fr 1fr;
 	}
 	ul.resultlist > li {
 		display: inline;
@@ -291,7 +291,7 @@ function createUi() {
 	finderBody.appendChild(buttonDiv);
 
 	document.body.appendChild(finderBox);
-	finderHead.ondblclick = function() { changeBoxLayout(finderBox) };
+	finderHead.ondblclick = function() { applyBoxLayout(finderBox, "toggle") };
 
 	textArea.addEventListener("paste", (event) => {
 		// Just check if pasted text is in the form of:
@@ -560,24 +560,24 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			if (vals.length == 1) {
 				const comment = document.createElement("h2");
 				comment.classList = "comment";
-	  		comment.innerText = vals[0].trim();
-	  		gameList.appendChild(comment);
-	  	} else {
-	  		if (vals[2]) {
-		  		nGames = vals[2].trim();
-		  		console.debug(`Games: ${nGames}`);
-		  	}
-		  	if (vals[3]) {
-		  		nMatches = vals[3].trim();
-		  		console.debug(`Matches: ${nMatches}`);
-		  	}
-		  	if (vals[0] != "" && vals[1] != "") {
+				comment.innerText = vals[0].trim();
+				gameList.appendChild(comment);
+			} else {
+				if (vals[2]) {
+					nGames = vals[2].trim();
+					console.debug(`Games: ${nGames}`);
+				}
+				if (vals[3]) {
+					nMatches = vals[3].trim();
+					console.debug(`Matches: ${nMatches}`);
+				}
+				if (vals[0] != "" && vals[1] != "") {
 					const matchHeader = document.createElement("h2");
 					matchHeader.classList = "matchHeader";
-		  		matchIndex = index;
-		  		teamWins = [0, 0];
-		  		const matchFixture = document.createElement("span");
-		  		matchFixture.classList.add("fixture");
+					matchIndex = index;
+					teamWins = [0, 0];
+					const matchFixture = document.createElement("span");
+					matchFixture.classList.add("fixture");
 					const home = document.createElement("span");
 					const away = document.createElement("span");
 					home.id = `${matchIndex}-home`;
@@ -605,7 +605,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 					matchHeader.appendChild(matchScore);
 					gameList.appendChild(matchHeader);
 				}
-	  	}
+			}
 		} else {
 			// Get players
 			let players = duel_txt.split(" - ");
@@ -743,67 +743,67 @@ const lastPosition = {};
 setupDraggable();
 
 function setupDraggable(){
-  dragHandleEl = document.querySelector("[data-drag-handle]");
-  dragHandleEl.addEventListener("mousedown", dragStart);
-  dragHandleEl.addEventListener("mouseup", dragEnd);
-  dragHandleEl.addEventListener("mouseout", dragEnd);
+	dragHandleEl = document.querySelector("[data-drag-handle]");
+	dragHandleEl.addEventListener("mousedown", dragStart);
+	dragHandleEl.addEventListener("mouseup", dragEnd);
+	dragHandleEl.addEventListener("mouseout", dragEnd);
 }
 
 function dragStart(event){
-  dragEl = getDraggableAncestor(event.target);
-  dragEl.style.setProperty("position","absolute");
-  lastPosition.left = event.target.clientX;
-  lastPosition.top = event.target.clientY;
-  dragHandleEl.classList.add("dragging");
-  dragHandleEl.addEventListener("mousemove", dragMove);
+	dragEl = getDraggableAncestor(event.target);
+	dragEl.style.setProperty("position","absolute");
+	lastPosition.left = event.target.clientX;
+	lastPosition.top = event.target.clientY;
+	dragHandleEl.classList.add("dragging");
+	dragHandleEl.addEventListener("mousemove", dragMove);
 }
 
 function dragMove(event){
-  const dragElRect = dragEl.getBoundingClientRect();
-  const newLeft = dragElRect.left + event.clientX - lastPosition.left;
-  const newTop = dragElRect.top + event.clientY - lastPosition.top;
-  dragEl.style.setProperty("left", `${newLeft}px`);
-  dragEl.style.setProperty("top", `${newTop}px`);
-  lastPosition.left = event.clientX;
-  lastPosition.top = event.clientY;
-  window.getSelection().removeAllRanges();
+	const dragElRect = dragEl.getBoundingClientRect();
+	const newLeft = dragElRect.left + event.clientX - lastPosition.left;
+	const newTop = dragElRect.top + event.clientY - lastPosition.top;
+	dragEl.style.setProperty("left", `${newLeft}px`);
+	dragEl.style.setProperty("top", `${newTop}px`);
+	lastPosition.left = event.clientX;
+	lastPosition.top = event.clientY;
+	window.getSelection().removeAllRanges();
 }
 
 function getDraggableAncestor(element){
-  if (element.getAttribute("data-draggable")) return element;
-  return getDraggableAncestor(element.parentElement);
+	if (element.getAttribute("data-draggable")) return element;
+	return getDraggableAncestor(element.parentElement);
 }
 
 function dragEnd(){
-  dragHandleEl.classList.remove("dragging");
-  dragHandleEl.removeEventListener("mousemove",dragMove);
-  dragEl = null;
+	dragHandleEl.classList.remove("dragging");
+	dragHandleEl.removeEventListener("mousemove",dragMove);
+	dragEl = null;
 }
 
 function saveDataToLocalStorage() {
-    const datePickerValue = document.getElementById("datePicker").value;
-    const dateShowValue = document.getElementById("dateShow").value;
-    const duelsConfigValue = document.getElementById("duelsConfig").value;
-    localStorage.setItem("datePicker", datePickerValue);
-    localStorage.setItem("dateShow", dateShowValue);
-    localStorage.setItem("duelsConfig", duelsConfigValue);
-    console.debug("Data saved to localStorage");
+	const datePickerValue = document.getElementById("datePicker").value;
+	const dateShowValue = document.getElementById("dateShow").value;
+	const duelsConfigValue = document.getElementById("duelsConfig").value;
+	localStorage.setItem("datePicker", datePickerValue);
+	localStorage.setItem("dateShow", dateShowValue);
+	localStorage.setItem("duelsConfig", duelsConfigValue);
+	console.debug("Data saved to localStorage");
 }
 
 function retrieveDataFromLocalStorage() {
-    const datePickerValue = localStorage.getItem("datePicker");
-    const dateShowValue = localStorage.getItem("dateShow");
-    const duelsConfigValue = localStorage.getItem("duelsConfig");
-    if (datePickerValue) {
-        document.getElementById("datePicker").value = datePickerValue;
-    }
-    if (dateShowValue) {
-        document.getElementById("dateShow").value = dateShowValue;
-    }
-    if (duelsConfigValue) {
-        document.getElementById("duelsConfig").value = duelsConfigValue;
-    }
-    console.debug("Data retrieved from localStorage");
+	const datePickerValue = localStorage.getItem("datePicker");
+	const dateShowValue = localStorage.getItem("dateShow");
+	const duelsConfigValue = localStorage.getItem("duelsConfig");
+	if (datePickerValue) {
+			document.getElementById("datePicker").value = datePickerValue;
+	}
+	if (dateShowValue) {
+			document.getElementById("dateShow").value = dateShowValue;
+	}
+	if (duelsConfigValue) {
+			document.getElementById("duelsConfig").value = duelsConfigValue;
+	}
+	console.debug("Data retrieved from localStorage");
 }
 
 function saveBoxLayoutToLocalStorage(el) {
