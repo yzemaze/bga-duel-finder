@@ -291,7 +291,22 @@ function createUi() {
 	finderBody.appendChild(buttonDiv);
 
 	document.body.appendChild(finderBox);
+	applyBoxLayout(finderBox);
+
 	finderHead.ondblclick = function() { applyBoxLayout(finderBox, "toggle") };
+
+	let timeout;
+	const resizeObserver = new ResizeObserver(entries => {
+		clearTimeout(timeout);
+		timeout = setTimeout(() => {
+		  requestAnimationFrame(() => {
+		    for (const entry of entries) {
+		      saveBoxLayoutToLocalStorage(entry.target);
+		    }
+		  });
+		}, 1000);
+	});
+	resizeObserver.observe(finderBox);
 
 	textArea.addEventListener("paste", (event) => {
 		// Just check if pasted text is in the form of:
@@ -778,6 +793,7 @@ function dragEnd(){
 	dragHandleEl.classList.remove("dragging");
 	dragHandleEl.removeEventListener("mousemove",dragMove);
 	dragEl = null;
+	saveBoxLayoutToLocalStorage();
 }
 
 function saveDataToLocalStorage() {
@@ -806,8 +822,9 @@ function retrieveDataFromLocalStorage() {
 	console.debug("Data retrieved from localStorage");
 }
 
-function saveBoxLayoutToLocalStorage(el) {
-	// const el = document.getElementById("finderBox");
+function saveBoxLayoutToLocalStorage(box) {
+	const el = box ?? document.getElementById("finderBox");
+	console.debug(el);
 	const orientation = el.classList.contains("horizontal") ? "h" : "v";
 	let fbAttribs = new Map();
 	if (localStorage.fbAttribs) {
@@ -824,7 +841,8 @@ function saveBoxLayoutToLocalStorage(el) {
 	console.debug("Layout saved to localStorage");
 }
 
-function applyBoxLayout(el, mode){
+function applyBoxLayout(box, mode) {
+	const el = box ?? document.getElementById("finderBox");
 	let orientation = "";
 	if (mode == "toggle") {
 		el.classList.toggle("horizontal");
@@ -855,6 +873,7 @@ function applyBoxLayout(el, mode){
 		el.style.bottom = "0px";
 		el.style.left = "0px";
 	}
+	saveBoxLayoutToLocalStorage(el);
 }
 
 })();
