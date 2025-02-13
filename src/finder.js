@@ -76,6 +76,10 @@ style.innerHTML = `
 	#finderBox * {
 		box-sizing: border-box;
 	}
+	#finderBox a.duel {
+		color: rgb(72, 113, 182);
+		text-decoration: none;
+	}
 	#finderBox.horizontal {
 		grid-auto-flow: column;
 		grid-template-columns: max-content 1fr max-content;
