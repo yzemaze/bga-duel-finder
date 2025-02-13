@@ -828,18 +828,18 @@ function saveBoxLayoutToLocalStorage(box) {
 	const el = box ?? document.getElementById("finderBox");
 	console.debug(el);
 	const orientation = el.classList.contains("horizontal") ? "h" : "v";
-	let fbAttribs = new Map();
-	if (localStorage.fbAttribs) {
-		fbAttribs = new Map(JSON.parse(localStorage.fbAttribs));
+	let dfBoxAttrs = new Map();
+	if (localStorage.dfBoxAttrs) {
+		dfBoxAttrs = new Map(JSON.parse(localStorage.dfBoxAttrs));
 	}
-	fbAttribs.set(orientation, {
+	dfBoxAttrs.set(orientation, {
 		height: el.style.height,
 		width: el.style.width,
 		top: el.style.top,
 		left: el.style.left,
 	});
-	fbAttribs.set("savedOrientation", orientation);
-	localStorage.setItem("fbAttribs", JSON.stringify([...fbAttribs]));
+	dfBoxAttrs.set("savedOrientation", orientation);
+	localStorage.setItem("dfBoxAttrs", JSON.stringify([...dfBoxAttrs]));
 	console.debug("Layout saved to localStorage");
 }
 
@@ -852,15 +852,15 @@ function applyBoxLayout(box, mode) {
 	}	else if (["h", "v"].includes(mode)) {
 		orientation = mode;
 	} else {
-		const fbAttribs = new Map(JSON.parse(localStorage.fbAttribs));
-		orientation = fbAttribs.get("savedOrientation") ?? "v";
+		const dfBoxAttrs = new Map(JSON.parse(localStorage.dfBoxAttrs));
+		orientation = dfBoxAttrs.get("savedOrientation") ?? "v";
 	}
-	if (localStorage.fbAttribs) {
-		const fbAttribs = new Map(JSON.parse(localStorage.fbAttribs));
-		el.style.height = fbAttribs.get(orientation)["height"];
-		el.style.width = fbAttribs.get(orientation)["width"];
-		el.style.top = fbAttribs.get(orientation)["top"];
-		el.style.left = fbAttribs.get(orientation)["left"];
+	if (localStorage.dfBoxAttrs) {
+		const dfBoxAttrs = new Map(JSON.parse(localStorage.dfBoxAttrs));
+		el.style.height = dfBoxAttrs.get(orientation)["height"];
+		el.style.width = dfBoxAttrs.get(orientation)["width"];
+		el.style.top = dfBoxAttrs.get(orientation)["top"];
+		el.style.left = dfBoxAttrs.get(orientation)["left"];
 	} else if (orientation == "h") {
 		el.style.height = "62px";
 		el.style.width = "max-content";
