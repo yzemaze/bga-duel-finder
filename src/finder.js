@@ -35,18 +35,18 @@
  *       MeepleWizard vs Bii1208
  *       Leuschi vs Wiseman from Arcadia
  *
- *  3. Click 'Find Duels'.
+ *  3. Click button "Find Duels".
  *  4. Drag (header only) and resize the box as you like.
  *  5. Doubleclick the header to toggle the layout.
  */
 
 (function() {
-'use strict';
+"use strict";
 
 const REQUEST_INTERVAL = 250;     // 250ms between requests, give BGA a break
 const CACHE_DURATION = 7*24*60*60*1000; // ms
 
-let style = document.createElement('style');
+let style = document.createElement("style");
 style.innerHTML = `
 	.drag-handle {
 	  cursor: pointer;
@@ -259,7 +259,7 @@ function createUi() {
 	inputForm.appendChild(textAreaLabel);
 	inputForm.appendChild(textArea);
 
-	const gameList = document.createElement('ul');
+	const gameList = document.createElement("ul");
 	gameList.id = "gameList";
 
 	const buttonDiv = document.createElement("div");
@@ -293,7 +293,7 @@ function createUi() {
 	finderHead.ondblclick = function() { changeBoxLayout(finderBox) };
 
 	textArea.addEventListener("paste", (event) => {
-		// Just check if pasted text was in the form of:
+		// Just check if pasted text is in the form of:
 		//
 		//   player1
 		//   vs
@@ -303,8 +303,8 @@ function createUi() {
 		//   player4
 		//   ...
 		//
-		// and fixed the text.
-		const pastedData = (event.clipboardData || window.clipboardData).getData('text');
+		// and format it.
+		const pastedData = (event.clipboardData || window.clipboardData).getData("text");
 		const lines = pastedData.split("\n");
 		const selectedElements = lines.filter((_, index) => (index - 1) % 3 === 0);
 		const vsElements = selectedElements.filter(element => element.trim() === "vs");
@@ -322,7 +322,7 @@ function createUi() {
 				pairs.push(`${player0.trim()} vs ${player1.trim()}`);
 			}
 		}
-		const transformedText = pairs.join('\n');
+		const transformedText = pairs.join("\n");
 
 		// Get the current cursor position or selection
 		const start = textArea.selectionStart;
@@ -397,10 +397,10 @@ function getPlayerId(name) {
 
 	try {
 		const response = dojo.xhrGet({
-			url: 'https://boardgamearena.com/player/player/findplayer.html',
+			url: "https://boardgamearena.com/player/player/findplayer.html",
 			content: { q: name, start: 0, count: Infinity },
 			sync: true,
-			handleAs: 'json'
+			handleAs: "json"
 		});
 
 		for (const currentUser of response.results[0].items) {
@@ -410,11 +410,11 @@ function getPlayerId(name) {
 				return currentUser.id;
 			}
 		}
-		console.error(`Couldn't find user ${name}`);
+		console.error(`Could not find user ${name}`);
 		throw "Player not found";
 	}
 	catch (error) {
-		console.error(`Couldn't find user ${name}`);
+		console.error(`Could not find user ${name}`);
 		throw error;
 	}
 }
@@ -440,10 +440,10 @@ async function getGames(player0, player1, day, game_id) {
 		}
 
 		const response = dojo.xhrGet({
-			url: 'https://boardgamearena.com/gamestats/gamestats/getGames.html',
+			url: "https://boardgamearena.com/gamestats/gamestats/getGames.html",
 			content: params,
-			handleAs: 'json',
-			headers: { 'X-Request-Token': bgaConfig.requestToken },
+			handleAs: "json",
+			headers: { "X-Request-Token": bgaConfig.requestToken },
 			sync: true
 		});
 		for (const table of response.results[0].data.tables) {
@@ -504,7 +504,7 @@ async function getGames(player0, player1, day, game_id) {
 		return { player0_id, player1_id, players_url, tables };
 	}
 	catch (error) {
-		console.error(`Couldnt get games for ${player0} – ${player1}: ${error}`);
+		console.error(`Could not get games for ${player0} – ${player1}: ${error}`);
 		return {
 			players_url: "#",
 			tables: []
@@ -520,8 +520,8 @@ async function getGameInProgress(player0_id, player1_id) {
 	const response = await dojo.xhrPost({
 		url: "https://boardgamearena.com/tablemanager/tablemanager/tableinfos.html",
 		postData: `playerfilter=${player0_id}&turninfo=false&matchmakingtables=false`,
-		handleAs: 'json',
-		headers: { 'X-Request-Token': bgaConfig.requestToken }
+		handleAs: "json",
+		headers: { "X-Request-Token": bgaConfig.requestToken }
 	});
 	for (const table of Object.values(response.data.tables)) {
 		if (table.status === "play") {
@@ -542,7 +542,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 	const showDates = document.getElementById("dateShow").checked;
 	const gameList = document.getElementById("gameList");
 	const duels_txt = all_duels_txt.split("\n");
-	const vsRegex = new RegExp(" vs ", 'i');
+	const vsRegex = new RegExp(" vs ", "i");
 	let matchIndex = -1;
 	let nMatches = 5;
 	let nGames = 3;
@@ -615,7 +615,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 				players = duel_txt.split("-");
 			}
 			if (players.length !== 2) {
-				console.error(`Couldn't get players for "${duel_txt}"`);
+				console.error(`Could not get players for "${duel_txt}"`);
 				continue;
 			}
 
@@ -632,9 +632,9 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			// Get games info
 			let wins = [0, 0];
 			for (const game of games) {
-				const result = document.createElement('li');
+				const result = document.createElement("li");
 				result.classList = "result";
-				const gameLink = document.createElement('a');
+				const gameLink = document.createElement("a");
 				const dateSpan = document.createElement("span");
 				dateSpan.classList.add("resultDate");
 				let dateText = ""
@@ -742,40 +742,40 @@ const lastPosition = {};
 setupDraggable();
 
 function setupDraggable(){
-  dragHandleEl = document.querySelector('[data-drag-handle]');
-  dragHandleEl.addEventListener('mousedown', dragStart);
-  dragHandleEl.addEventListener('mouseup', dragEnd);
-  dragHandleEl.addEventListener('mouseout', dragEnd);
+  dragHandleEl = document.querySelector("[data-drag-handle]");
+  dragHandleEl.addEventListener("mousedown", dragStart);
+  dragHandleEl.addEventListener("mouseup", dragEnd);
+  dragHandleEl.addEventListener("mouseout", dragEnd);
 }
 
 function dragStart(event){
   dragEl = getDraggableAncestor(event.target);
-  dragEl.style.setProperty('position','absolute');
+  dragEl.style.setProperty("position","absolute");
   lastPosition.left = event.target.clientX;
   lastPosition.top = event.target.clientY;
-  dragHandleEl.classList.add('dragging');
-  dragHandleEl.addEventListener('mousemove', dragMove);
+  dragHandleEl.classList.add("dragging");
+  dragHandleEl.addEventListener("mousemove", dragMove);
 }
 
 function dragMove(event){
   const dragElRect = dragEl.getBoundingClientRect();
   const newLeft = dragElRect.left + event.clientX - lastPosition.left;
   const newTop = dragElRect.top + event.clientY - lastPosition.top;
-  dragEl.style.setProperty('left', `${newLeft}px`);
-  dragEl.style.setProperty('top', `${newTop}px`);
+  dragEl.style.setProperty("left", `${newLeft}px`);
+  dragEl.style.setProperty("top", `${newTop}px`);
   lastPosition.left = event.clientX;
   lastPosition.top = event.clientY;
   window.getSelection().removeAllRanges();
 }
 
 function getDraggableAncestor(element){
-  if (element.getAttribute('data-draggable')) return element;
+  if (element.getAttribute("data-draggable")) return element;
   return getDraggableAncestor(element.parentElement);
 }
 
 function dragEnd(){
-  dragHandleEl.classList.remove('dragging');
-  dragHandleEl.removeEventListener('mousemove',dragMove);
+  dragHandleEl.classList.remove("dragging");
+  dragHandleEl.removeEventListener("mousemove",dragMove);
   dragEl = null;
 }
 
