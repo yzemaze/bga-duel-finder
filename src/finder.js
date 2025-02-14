@@ -518,6 +518,10 @@ async function getGames(player0, player1, day, gameId) {
 		for (const table of response.results[0].data.tables) {
 			const tableUrl = `https://boardgamearena.com/table?table=${table.table_id}`;
 			const tablePlayers = table.players.split(",");
+			// remove mutually abandoned tables
+			if (table.scores === null) {
+				continue;
+			}
 			const tableScores = table.scores ? table.scores.split(",") : ["?", "?"];
 			const tableRanks = table.ranks ? table.ranks.split(",") : ["?", "?"];
 			const tableStartDate = new Date(table.start * 1000);
