@@ -102,7 +102,7 @@ style.innerHTML = `
 	#finderBox.horizontal h2.matchHeader {
 		margin: 0;
 	}
-	.horizontal .comment {
+	.horizontal .dfComment {
 		min-width: 10em;
 	}
 	.horizontal .fixtureScore, .horizontal .duelScore {
@@ -111,6 +111,9 @@ style.innerHTML = `
 	#finderBox h2 {
 		font-weight: normal;
 		margin: 0;
+	}
+	#finderBox h2.dfComment {
+		font-weight: bold;
 	}
 	#finderHead {
 		background: #4871b6;
@@ -590,7 +593,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			let vals = duel_txt.substring(1).split(",");
 			if (vals.length == 1) {
 				const comment = document.createElement("h2");
-				comment.classList = "comment";
+				comment.classList = "dfComment";
 				comment.innerText = vals[0].trim();
 				gameList.appendChild(comment);
 			} else {
