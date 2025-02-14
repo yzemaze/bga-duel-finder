@@ -112,6 +112,9 @@ style.innerHTML = `
 		font-weight: normal;
 		margin: 0;
 	}
+	#finderBox .bga-link {
+		font-weight: normal;
+	}
 	#finderBox h2.dfComment {
 		font-weight: bold;
 	}
@@ -204,12 +207,28 @@ style.innerHTML = `
 		content: " • ";
 		color: #888;
 	}
+	li.result {
+		display: grid;
+		grid-template-columns: repeat(3, max-content);
+		grid-gap: 5px;
+		align-items: end;
+	}
 	li.result .resultDate {
 		font-size: 0.9em;
-		padding-right: 5px;
+	}
+	li.result .bga-link {
+	  display: grid;
+	  grid-template-columns: 1.8em .4em 1.8em;
+	  justify-items: end;
+	}
+	.noDates li.result .bga-link {
+		display: inline;
 	}
 	span.win {
 		font-weight: bold;
+	}
+	span.progress {
+		grid-column: 3 span;
 	}
  `;
 document.head.appendChild(style);
@@ -690,7 +709,10 @@ async function getAllDuels(allDuelsTxt, day, gameId) {
 				result.appendChild(dateSpan);
 				gameLink.classList = "bga-link";
 				if (game.progress) {
-					gameLink.innerHTML = `${game.progress}%`;
+					const progressSpan = document.createElement("span");
+					progressSpan.classList.add("progress");
+					progressSpan.innerText = `${game.progress}%`;
+					gameLink.appendChild(progressSpan);
 				} else {
 					const homeScore = document.createElement("span");
 					const awayScore = document.createElement("span");
@@ -710,7 +732,10 @@ async function getAllDuels(allDuelsTxt, day, gameId) {
 				gameLink.href = game.url;
 				result.appendChild(gameLink);
 				if (game.flags) {
-					result.appendChild(document.createTextNode(game.flags));
+					const flagsSpan = document.createElement("span");
+					flagsSpan.classList.add("flags");
+					flagsSpan.innerText = game.flags;
+					result.appendChild(flagsSpan);
 				}
 				duelGamesList.appendChild(result);
 			}
