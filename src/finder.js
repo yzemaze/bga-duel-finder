@@ -879,7 +879,6 @@ function retrieveDataFromLocalStorage() {
 
 function saveBoxLayoutToLocalStorage(box) {
 	const el = box ?? document.getElementById("finderBox");
-	console.debug(el);
 	const orientation = el.classList.contains("horizontal") ? "h" : "v";
 	let dfBoxAttrs = new Map();
 	if (localStorage.dfBoxAttrs) {
