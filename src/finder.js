@@ -3,49 +3,15 @@
  *
  * Find and display duels from a list of fixtures.
  * Highlight winnning scores, calculate duel and team match results.
- *
- * Usage:
- *  1. Copy and paste this code to the developer console
- *     or use a bookmarklet https://caiorss.github.io/bookmarklet-maker/
- *  2. Pick date and paste/edit duel list.
- *     " - " or " vs " are valid separators between usernames.
- *     Lines starting with # are treated as headers/comments between duels.
- *     There are some configuration options (# and , are essential!):
- *     #Team A,Team B,games per duel,duels per match
- *     If gpd or dpm are left blank, they default to WTCOC-/CCL-standard:
- *     - games per duel: 3
- *     - duels per match: 5
- *     Just leave team names blank if you only need to change gpd.
- *
- *     Multiple matches can be displayed, e.g.:
- *     - Date: 21-04-2024
- *     - Show date: blank/false
- *     - Matches & duels:
- *       #WTCOC 2024 Group D - Round 1
- *       #Belgium,Peru
- *       CraftyRaf vs Eymicienta04
- *       JinaJina vs spakune
- *       Carcharoth 9 vs Sparklehorsee-
- *       Sicarius Lupus vs -Nari-
- *       Nicedicer vs AndreeMC
- *       #Germany,Vietnam
- *       Meami vs portgard
- *       Medusahope vs Wolf Ren
- *       kostra vs Mùng0910
- *       MeepleWizard vs Bii1208
- *       Leuschi vs Wiseman from Arcadia
- *
- *  3. Click button "Find Duels".
- *  4. Drag (header only) and resize the box as you like.
- *  5. Doubleclick the header to toggle the layout.
+ * cf. README.md or https://github.com/yzemaze/bga-duel-finder
  */
 
 (function() {
 "use strict";
 
-const REQUEST_INTERVAL = 250;     // 250ms between requests, give BGA a break
-const CACHE_DURATION = 7*24*60*60*1000; // ms
-const DATA_CACHE_DURATION = 2*60*60*1000;
+const REQUEST_INTERVAL = 250; // ms
+const CACHE_DURATION = 7*24*60*60*1000; // 7d in ms
+const DATA_CACHE_DURATION = 2*60*60*1000; // 2h in ms
 
 let style = document.createElement("style");
 style.innerHTML = `
@@ -174,7 +140,6 @@ style.innerHTML = `
 	#gamesList {
 		display: none;
 		overflow: auto;
-		/*grid-template-rows: repeat(100, min-content);*/
 		grid-auto-rows: max-content;
 		grid-gap: 2px;
 	}
@@ -630,11 +595,9 @@ async function getAllDuels(allDuelsTxt, day, gameId) {
 			} else {
 				if (vals[2]) {
 					nGames = vals[2].trim();
-					console.debug(`Games: ${nGames}`);
 				}
 				if (vals[3]) {
 					nMatches = vals[3].trim();
-					console.debug(`Matches: ${nMatches}`);
 				}
 				if (vals[0] != "" && vals[1] != "") {
 					const matchHeader = document.createElement("h2");
@@ -666,7 +629,6 @@ async function getAllDuels(allDuelsTxt, day, gameId) {
 					matchScore.appendChild(awayTeamScore);
 					homeTeamScore.innerText = teamWins[0];
 					awayTeamScore.innerText = teamWins[1];
-					console.debug(`SCORES: ${homeTeamScore.innerText} – ${awayTeamScore.innerText}`);
 					matchHeader.appendChild(matchScore);
 					gamesList.appendChild(matchHeader);
 				}
