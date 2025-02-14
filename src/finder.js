@@ -410,7 +410,7 @@ function createUi() {
 	};
 
 	closeButton.onclick = function () {
-		finderBox.style.display = "none";
+		document.body.removeChild(finderBox);
 	}
 
 	reloadButton.onclick = async function () {
