@@ -397,10 +397,10 @@ function createUi() {
 		textArea.disabled = true;
 		findButton.disabled = true;
 		saveDataToLocalStorage();
-		await getAllDuels(duelsText, unixTimestamp, game_id);
-		findButton.disabled = false;
 		document.getElementById("finderBody").classList.toggle("duelsView");
 		gamesList.classList = dateShow.checked ? "" : "noDates";
+		await getAllDuels(duelsText, unixTimestamp, game_id);
+		findButton.disabled = false;
 	};
 
 	backButton.onclick = function () {
