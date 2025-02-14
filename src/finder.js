@@ -76,7 +76,7 @@ style.innerHTML = `
 	#finderBox * {
 		box-sizing: border-box;
 	}
-	#finderBox a.duel {
+	#finderBox .duel a {
 		color: rgb(72, 113, 182);
 		text-decoration: none;
 	}
