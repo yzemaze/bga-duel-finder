@@ -95,7 +95,7 @@ style.innerHTML = `
 		grid-template-columns: 1fr auto;
 	  padding: 10px;
 	}
-	.horizontal #gameList {
+	.horizontal #gamesList {
 		grid-auto-flow: column;
 		grid-gap: 10px;
 	}
@@ -136,6 +136,9 @@ style.innerHTML = `
 		width: fit-content;
 		border-radius: 5px;
 	}
+	.duelsView #inputForm {
+		display: none;
+	}
 	#duelsConfig, #duelsConfigLabel {
 		grid-column: span 2;
 	}
@@ -145,7 +148,7 @@ style.innerHTML = `
 	}
 	#buttonDiv {
 		display: grid;
-		grid-template-columns: max-content max-content;
+		grid-template-columns: repeat(3, max-content);
 		grid-gap: 10px;
 	}
 	#buttonDiv .bgabutton {
@@ -153,15 +156,27 @@ style.innerHTML = `
 		height: fit-content;
 		width: fit-content;
 	}
-	#backButton, #reloadButton {
+	#findButton, #closeButton {
+		display: block;
+	}
+	#backButton, #reloadButton, #toggleDatesButton {
 		display: none;
 	}
-	#gameList {
+	.duelsView #backButton, .duelsView #reloadButton, .duelsView #toggleDatesButton {
+		display: block;
+	}
+	.duelsView #findButton, .duelsView #closeButton, .horizontal #toggleDatesButton {
+		display: none;
+	}
+	#gamesList {
 		display: none;
 		overflow: auto;
 		/*grid-template-rows: repeat(100, min-content);*/
 		grid-auto-rows: max-content;
 		grid-gap: 2px;
+	}
+	.duelsView #gamesList {
+		display: grid;
 	}
 	.matchHeader, .duelHeader {
 		display: grid;
@@ -179,14 +194,17 @@ style.innerHTML = `
 		display: grid;
 		grid-template-rows: max-content 1fr;
 	}
-	ul.resultlist > li {
+	#gamesList.noDates .resultDate {
+  	display: none;
+	}
+	#gamesList.noDates ul.duelGamesList > li {
 		display: inline;
 	}
-	ul.resultlist > li:not(:last-child)::after {
+	#gamesList.noDates ul.duelGamesList > li:not(:last-child)::after {
 		content: " • ";
 		color: #888;
 	}
-	li.result span.resultDate {
+	li.result .resultDate {
 		font-size: 0.9em;
 		padding-right: 5px;
 	}
@@ -275,8 +293,8 @@ function createUi() {
 	inputForm.appendChild(textAreaLabel);
 	inputForm.appendChild(textArea);
 
-	const gameList = document.createElement("ul");
-	gameList.id = "gameList";
+	const gamesList = document.createElement("ul");
+	gamesList.id = "gamesList";
 
 	const buttonDiv = document.createElement("div");
 	buttonDiv.id = "buttonDiv";
@@ -286,7 +304,7 @@ function createUi() {
 	findButton.innerText = "Find Duels";
 	const backButton = document.createElement("a");
 	backButton.id = "backButton";
-	backButton.classList = "bgabutton bgabutton_blue";
+	backButton.classList = "bgabutton bgabutton_red";
 	backButton.innerText = "Back";
 	const closeButton = document.createElement("a");
 	closeButton.id = "closeButton";
@@ -296,13 +314,18 @@ function createUi() {
 	reloadButton.id = "reloadButton";
 	reloadButton.classList = "bgabutton bgabutton_green";
 	reloadButton.innerText = "Reload";
+	const toggleDatesButton = document.createElement("a");
+	toggleDatesButton.id = "toggleDatesButton";
+	toggleDatesButton.classList = "bgabutton bgabutton_blue";
+	toggleDatesButton.innerText = "Toggle Dates";
+	buttonDiv.appendChild(closeButton);
 	buttonDiv.appendChild(findButton);
 	buttonDiv.appendChild(backButton);
-	buttonDiv.appendChild(closeButton);
 	buttonDiv.appendChild(reloadButton);
+	buttonDiv.appendChild(toggleDatesButton);
 
 	finderBody.appendChild(inputForm);
-	finderBody.appendChild(gameList);
+	finderBody.appendChild(gamesList);
 	finderBody.appendChild(buttonDiv);
 
 	document.body.appendChild(finderBox);
@@ -375,25 +398,15 @@ function createUi() {
 		findButton.disabled = true;
 		saveDataToLocalStorage();
 		await getAllDuels(duelsText, unixTimestamp, game_id);
-
 		findButton.disabled = false;
-		inputForm.style.display = "none";
-		gameList.style.display = "grid";
-		findButton.style.display = "none";
-		closeButton.style.display = "none";
-		backButton.style.display = "block";
-		reloadButton.style.display = "block";
+		document.getElementById("finderBody").classList.toggle("duelsView");
+		gamesList.classList = dateShow.checked ? "" : "noDates";
 	};
 
 	backButton.onclick = function () {
-		inputForm.style.display = "grid";
-		gameList.style.display = "none";
-		gameList.innerHTML = "";
+		document.getElementById("finderBody").classList.toggle("duelsView");
+		gamesList.innerHTML = "";
 		textArea.disabled = false;
-		findButton.style.display = "block";
-		closeButton.style.display = "block";
-		backButton.style.display = "none";
-		reloadButton.style.display = "none";
 	};
 
 	closeButton.onclick = function () {
@@ -405,9 +418,12 @@ function createUi() {
 		const date = new Date(datePicker.value);
 		const unixTimestamp = Math.floor(date.getTime() / 1000);
 		const duelsText = textArea.value;
-		gameList.style.display = "grid";
-		gameList.innerHTML = "";
+		gamesList.innerHTML = "";
 		await getAllDuels(duelsText, unixTimestamp, game_id);
+	}
+
+	toggleDatesButton.onclick = function () {
+		document.getElementById("gamesList").classList.toggle("noDates");
 	}
 
 	retrieveDataFromLocalStorage();
@@ -574,8 +590,7 @@ async function sleep(ms) {
 }
 
 async function getAllDuels(all_duels_txt, day, game_id) {
-	const showDates = document.getElementById("dateShow").checked;
-	const gameList = document.getElementById("gameList");
+	const gamesList = document.getElementById("gamesList");
 	const duels_txt = all_duels_txt.split("\n");
 	const vsRegex = new RegExp(" vs ", "i");
 	let matchIndex = -1;
@@ -595,7 +610,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 				const comment = document.createElement("h2");
 				comment.classList = "dfComment";
 				comment.innerText = vals[0].trim();
-				gameList.appendChild(comment);
+				gamesList.appendChild(comment);
 			} else {
 				if (vals[2]) {
 					nGames = vals[2].trim();
@@ -637,7 +652,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 					awayTeamScore.innerText = teamWins[1];
 					console.debug(`SCORES: ${homeTeamScore.innerText} – ${awayTeamScore.innerText}`);
 					matchHeader.appendChild(matchScore);
-					gameList.appendChild(matchHeader);
+					gamesList.appendChild(matchHeader);
 				}
 			}
 		} else {
@@ -660,10 +675,8 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			const games_data = await getGames(players[0], players[1], day, game_id);
 			const games = games_data.tables;
 
-			const duelGameList = document.createElement("ul");
-			if (!showDates) {
-				duelGameList.classList.add("resultlist");
-			}
+			const duelGamesList = document.createElement("ul");
+			duelGamesList.classList.add("duelGamesList");
 			// Get games info
 			let wins = [0, 0];
 			for (const game of games) {
@@ -673,17 +686,15 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 				const dateSpan = document.createElement("span");
 				dateSpan.classList.add("resultDate");
 				let dateText = ""
-				if (showDates) {
-					if (isToday(day)) {
-						dateText = `${game.startDate.substring(11)}–${game.endDate.substring(11)}`;
-					} else if (day || (game.startDate.substring(0,10) == game.endDate.substring(0,10))) {
-						dateText = `${game.startDate}–${game.endDate.substring(11)}`;
-					} else {
-						dateText = `${game.startDate}–${game.endDate}`;
-					}
-					dateSpan.innerText = `${dateText} `;
-					result.appendChild(dateSpan);
+				if (isToday(day)) {
+					dateText = `${game.startDate.substring(11)}–${game.endDate.substring(11)}`;
+				} else if (day || (game.startDate.substring(0,10) == game.endDate.substring(0,10))) {
+					dateText = `${game.startDate}–${game.endDate.substring(11)}`;
+				} else {
+					dateText = `${game.startDate}–${game.endDate}`;
 				}
+				dateSpan.innerText = dateText;
+				result.appendChild(dateSpan);
 				gameLink.classList = "bga-link";
 				if (game.progress) {
 					gameLink.innerHTML = `${game.progress}%`;
@@ -708,7 +719,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 				if (game.flags) {
 					result.appendChild(document.createTextNode(game.flags));
 				}
-				duelGameList.appendChild(result);
+				duelGamesList.appendChild(result);
 			}
 			const duel = document.createElement("li");
 			duel.classList = "duel";
@@ -763,8 +774,8 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			duelHeader.appendChild(duelLink);
 			duelHeader.appendChild(duelScore);
 			duel.appendChild(duelHeader);
-			duel.appendChild(duelGameList);
-			gameList.appendChild(duel);
+			duel.appendChild(duelGamesList);
+			gamesList.appendChild(duel);
 		}
 	}
 	return true;
