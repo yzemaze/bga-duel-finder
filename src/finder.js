@@ -390,7 +390,7 @@ function createUi() {
 	});
 
 	findButton.onclick = async function () {
-		const game_id = 1; // Carcassonne
+		const gameId = 1; // Carcassonne
 		const date = new Date(datePicker.value);
 		const unixTimestamp = Math.floor(date.getTime() / 1000);
 		const duelsText = textArea.value;
@@ -399,7 +399,7 @@ function createUi() {
 		saveDataToLocalStorage();
 		document.getElementById("finderBody").classList.toggle("duelsView");
 		gamesList.classList = dateShow.checked ? "" : "noDates";
-		await getAllDuels(duelsText, unixTimestamp, game_id);
+		await getAllDuels(duelsText, unixTimestamp, gameId);
 		findButton.disabled = false;
 	};
 
@@ -414,12 +414,12 @@ function createUi() {
 	}
 
 	reloadButton.onclick = async function () {
-		const game_id = 1; // Carcassonne
+		const gameId = 1; // Carcassonne
 		const date = new Date(datePicker.value);
 		const unixTimestamp = Math.floor(date.getTime() / 1000);
 		const duelsText = textArea.value;
 		gamesList.innerHTML = "";
-		await getAllDuels(duelsText, unixTimestamp, game_id);
+		await getAllDuels(duelsText, unixTimestamp, gameId);
 	}
 
 	toggleDatesButton.onclick = function () {
@@ -473,15 +473,15 @@ function getPlayerId(name) {
  * Return games for two players in a given day
  *
  */
-async function getGames(player0, player1, day, game_id) {
+async function getGames(player0, player1, day, gameId) {
 	const tables = [];
 	try {
-		const player0_id = getPlayerId(player0);
-		const player1_id = getPlayerId(player1);
+		const player0Id = getPlayerId(player0);
+		const player1Id = getPlayerId(player1);
 		const params = {
-			game_id: game_id,
-			player: player0_id,
-			opponent_id: player1_id,
+			game_id: gameId,
+			player: player0Id,
+			opponent_id: player1Id,
 			updateStats: 1
 		};
 		if (day) {
@@ -497,47 +497,40 @@ async function getGames(player0, player1, day, game_id) {
 			sync: true
 		});
 		for (const table of response.results[0].data.tables) {
-			const table_url = `https://boardgamearena.com/table?table=${table.table_id}`;
-			const table_players = table.players.split(",");
-			const table_scores = table.scores ? table.scores.split(",") : ["?", "?"];
-			const table_ranks = table.ranks ? table.ranks.split(",") : ["?", "?"];
-			const table_start_date = new Date(table.start * 1000);
-			const table_end_date = new Date(table.end * 1000);
-			let table_flags = "";
-			// if (table_scores[0] == table_scores[1]) {
-			// 	if (table_ranks[0] == 1) {
-			// 		table_scores[0] += "*";
-			// 	} else {
-			// 		table_scores[1] += "*";
-			// 	}
-			// }
+			const tableUrl = `https://boardgamearena.com/table?table=${table.table_id}`;
+			const tablePlayers = table.players.split(",");
+			const tableScores = table.scores ? table.scores.split(",") : ["?", "?"];
+			const tableRanks = table.ranks ? table.ranks.split(",") : ["?", "?"];
+			const tableStartDate = new Date(table.start * 1000);
+			const tableEndDate = new Date(table.end * 1000);
+			let tableFlags = "";
 			if (table.concede == 1) {
-				table_flags += " 🏳️ ";
+				tableFlags += " 🏳️ ";
 			}
-			if (table.arena_win) {
-				table_flags += " 🏟️ ";
+			if (table.arenaWin) {
+				tableFlags += " 🏟️ ";
 			}
 
 			tables.push({
 				id: table.table_id,
-				url: table_url,
-				score0: (table_players[0] == player0_id) ? `${table_scores[0]}` : `${table_scores[1]}`,
-				score1: (table_players[0] == player0_id) ? `${table_scores[1]}` : `${table_scores[0]}`,
-				rank0: (table_players[0] == player0_id) ? `${table_ranks[0]}` : `${table_ranks[1]}`,
-				startDate: table_start_date.toISOString().substr(0, 16).replace("T", " "),
-				endDate: table_end_date.toISOString().substr(0, 16).replace("T", " "),
+				url: tableUrl,
+				score0: (tablePlayers[0] == player0Id) ? `${tableScores[0]}` : `${tableScores[1]}`,
+				score1: (tablePlayers[0] == player0Id) ? `${tableScores[1]}` : `${tableScores[0]}`,
+				rank0: (tablePlayers[0] == player0Id) ? `${tableRanks[0]}` : `${tableRanks[1]}`,
+				startDate: tableStartDate.toISOString().substr(0, 16).replace("T", " "),
+				endDate: tableEndDate.toISOString().substr(0, 16).replace("T", " "),
 				timestamp: table.start,
-				flags: table_flags
+				flags: tableFlags
 			});
 		}
 		tables.sort((a, b) => a.timestamp - b.timestamp);
-		let players_url = `https://boardgamearena.com/gamestats?player=${player0_id}&opponent_id=${player1_id}&game_id=${game_id}&finished=0`;
+		let playersUrl = `https://boardgamearena.com/gamestats?player=${player0Id}&opponent_id=${player1Id}&game_id=${gameId}&finished=0`;
 		if (day) {
-			players_url += `&start_date=${day}&end_date=${day + 86400}`;
+			playersUrl += `&start_date=${day}&end_date=${day + 86400}`;
 		}
 
 		if (!day || isToday(day)) {
-			const table = await getGameInProgress(player0_id, player1_id);
+			const table = await getGameInProgress(player0Id, player1Id);
 			if (table) {
 				tables.push({
 					id: table.id,
@@ -552,12 +545,12 @@ async function getGames(player0, player1, day, game_id) {
 		}
 		console.debug(`Got ${tables.length} tables`);
 
-		return { player0_id, player1_id, players_url, tables };
+		return { player0Id, player1Id, playersUrl, tables };
 	}
 	catch (error) {
 		console.error(`Could not get games for ${player0} – ${player1}: ${error}`);
 		return {
-			players_url: "#",
+			playersUrl: "#",
 			tables: []
 		};
 	}
@@ -566,17 +559,17 @@ async function getGames(player0, player1, day, game_id) {
 /**
  * Return game in progress, if any, for the given players.
  */
-async function getGameInProgress(player0_id, player1_id) {
+async function getGameInProgress(player0Id, player1Id) {
 	console.debug("Searching for game in progress");
 	const response = await dojo.xhrPost({
 		url: "https://boardgamearena.com/tablemanager/tablemanager/tableinfos.html",
-		postData: `playerfilter=${player0_id}&turninfo=false&matchmakingtables=false`,
+		postData: `playerfilter=${player0Id}&turninfo=false&matchmakingtables=false`,
 		handleAs: "json",
 		headers: { "X-Request-Token": bgaConfig.requestToken }
 	});
 	for (const table of Object.values(response.data.tables)) {
 		if (table.status === "play") {
-			const foundSecondPlayer = Object.keys(table.players).filter(id => id == player1_id);
+			const foundSecondPlayer = Object.keys(table.players).filter(id => id == player1Id);
 			if (foundSecondPlayer.length > 0) {
 				return table;
 			}
@@ -589,23 +582,23 @@ async function sleep(ms) {
 	await new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function getAllDuels(all_duels_txt, day, game_id) {
+async function getAllDuels(allDuelsTxt, day, gameId) {
 	const gamesList = document.getElementById("gamesList");
-	const duels_txt = all_duels_txt.split("\n");
+	const duelsTxt = allDuelsTxt.split("\n");
 	const vsRegex = new RegExp(" vs ", "i");
 	let matchIndex = -1;
 	let nMatches = 5;
 	let nGames = 3;
 	let teamWins = [0,0];
 
-	for (const [index, duel_txt] of duels_txt.entries()) {
-		if (!duel_txt) {
+	for (const [index, duelTxt] of duelsTxt.entries()) {
+		if (!duelTxt) {
 			continue;
 		}
 
 		// Check for Comments
-		if (duel_txt.startsWith("#")) {
-			let vals = duel_txt.substring(1).split(",");
+		if (duelTxt.startsWith("#")) {
+			let vals = duelTxt.substring(1).split(",");
 			if (vals.length == 1) {
 				const comment = document.createElement("h2");
 				comment.classList = "dfComment";
@@ -657,23 +650,23 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			}
 		} else {
 			// Get players
-			let players = duel_txt.split(" - ");
+			let players = duelTxt.split(" - ");
 			if (players.length !== 2) {
-				players = duel_txt.split(vsRegex);
+				players = duelTxt.split(vsRegex);
 			}
 			if (players.length !== 2) {
-				players = duel_txt.split("-");
+				players = duelTxt.split("-");
 			}
 			if (players.length !== 2) {
-				console.error(`Could not get players for "${duel_txt}"`);
+				console.error(`Could not get players for "${duelTxt}"`);
 				continue;
 			}
 
 			players = [players[0].trim(), players[1].trim()];
 
 			await sleep(REQUEST_INTERVAL);
-			const games_data = await getGames(players[0], players[1], day, game_id);
-			const games = games_data.tables;
+			const gamesData = await getGames(players[0], players[1], day, gameId);
+			const games = gamesData.tables;
 
 			const duelGamesList = document.createElement("ul");
 			duelGamesList.classList.add("duelGamesList");
@@ -732,7 +725,7 @@ async function getAllDuels(all_duels_txt, day, game_id) {
 			duelLink.appendChild(duelHome);
 			duelLink.appendChild(document.createTextNode(" – "));
 			duelLink.appendChild(duelAway);
-			duelLink.href = games_data.players_url;
+			duelLink.href = gamesData.playersUrl;
 			duelHome.innerText = players[0];
 			duelAway.innerText = players[1];
 
