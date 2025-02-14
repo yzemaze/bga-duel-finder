@@ -63,7 +63,7 @@ style.innerHTML = `
 		left: 0px;
 		bottom: 0px;
 		width: max-content;
-		min-width: 210px;
+		min-width: fit-content;
 		height: max-content;
 		min-height: 110px;
 		background: #f0f0f0;
