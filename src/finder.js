@@ -205,19 +205,9 @@ createUi();
  */
 function isToday(unixTimestamp) {
 	const today = new Date();
-	const todayYear = today.getFullYear();
-	const todayMonth = today.getMonth();
-	const todayDay = today.getDate();
-
 	const date = new Date(unixTimestamp * 1000);
-	const givenYear = date.getFullYear();
-	const givenMonth = date.getMonth();
-	const givenDay = date.getDate();
-
 	return (
-		todayYear === givenYear &&
-		todayMonth === givenMonth &&
-		todayDay === givenDay
+		date.setHours(0,0,0,0) == today.setHours(0,0,0,0)
 	);
 }
 
