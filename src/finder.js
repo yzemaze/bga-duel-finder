@@ -755,49 +755,37 @@ async function getAllDuels(allDuelsTxt, day, gameId) {
 	return true;
 }
 
-let dragEl;
-let dragHandleEl
-const lastPosition = {};
+dragElement(document.getElementById("finderBox"));
 
-setupDraggable();
+function dragElement(el) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  document.getElementById("finderHead").onmousedown = dragMouseDown;
 
-function setupDraggable(){
-	dragHandleEl = document.querySelector("[data-drag-handle]");
-	dragHandleEl.addEventListener("mousedown", dragStart);
-	dragHandleEl.addEventListener("mouseup", dragEnd);
-	dragHandleEl.addEventListener("mouseout", dragEnd);
-}
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    document.onmousemove = elementDrag;
+  }
 
-function dragStart(event){
-	dragEl = getDraggableAncestor(event.target);
-	dragEl.style.setProperty("position","absolute");
-	lastPosition.left = event.target.clientX;
-	lastPosition.top = event.target.clientY;
-	dragHandleEl.classList.add("dragging");
-	dragHandleEl.addEventListener("mousemove", dragMove);
-}
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    el.style.top = (el.offsetTop - pos2) + "px";
+    el.style.left = (el.offsetLeft - pos1) + "px";
+  }
 
-function dragMove(event){
-	const dragElRect = dragEl.getBoundingClientRect();
-	const newLeft = dragElRect.left + event.clientX - lastPosition.left;
-	const newTop = dragElRect.top + event.clientY - lastPosition.top;
-	dragEl.style.setProperty("left", `${newLeft}px`);
-	dragEl.style.setProperty("top", `${newTop}px`);
-	lastPosition.left = event.clientX;
-	lastPosition.top = event.clientY;
-	window.getSelection().removeAllRanges();
-}
-
-function getDraggableAncestor(element){
-	if (element.getAttribute("data-draggable")) return element;
-	return getDraggableAncestor(element.parentElement);
-}
-
-function dragEnd(){
-	dragHandleEl.classList.remove("dragging");
-	dragHandleEl.removeEventListener("mousemove",dragMove);
-	dragEl = null;
-	saveBoxLayoutToLocalStorage();
+  function closeDragElement() {
+    document.onmouseup = null;
+    document.onmousemove = null;
+    saveBoxLayoutToLocalStorage();
+  }
 }
 
 function saveDataToLocalStorage() {
