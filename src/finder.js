@@ -59,7 +59,7 @@ style.innerHTML = `
 		grid-template-rows: none;
 		grid-auto-flow: column;
 		grid-template-columns: 1fr auto;
-	  padding: 10px;
+		padding: 10px;
 	}
 	.horizontal #gamesList {
 		grid-auto-flow: column;
@@ -163,7 +163,7 @@ style.innerHTML = `
 		grid-template-rows: max-content 1fr;
 	}
 	#gamesList.noDates .resultDate {
-  	display: none;
+		display: none;
 	}
 	#gamesList.noDates ul.duelGamesList > li {
 		display: inline;
@@ -182,9 +182,9 @@ style.innerHTML = `
 		font-size: 0.9em;
 	}
 	li.result .bga-link {
-	  display: grid;
-	  grid-template-columns: 1.8em .4em 1.8em;
-	  justify-items: end;
+		display: grid;
+		grid-template-columns: 1.8em .4em 1.8em;
+		justify-items: end;
 	}
 	.noDates li.result .bga-link {
 		display: inline;
@@ -311,11 +311,11 @@ function createUi() {
 	const resizeObserver = new ResizeObserver(entries => {
 		clearTimeout(timeout);
 		timeout = setTimeout(() => {
-		  requestAnimationFrame(() => {
-		    for (const entry of entries) {
-		      saveBoxLayoutToLocalStorage(entry.target);
-		    }
-		  });
+			requestAnimationFrame(() => {
+				for (const entry of entries) {
+					saveBoxLayoutToLocalStorage(entry.target);
+				}
+			});
 		}, 1000);
 	});
 	resizeObserver.observe(finderBox);
@@ -748,34 +748,34 @@ async function getAllDuels(allDuelsTxt, day, gameId) {
 dragElement(document.getElementById("finderBox"));
 
 function dragElement(el) {
-  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-  document.getElementById("finderHead").onmousedown = dragMouseDown;
+	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+	document.getElementById("finderHead").onmousedown = dragMouseDown;
 
-  function dragMouseDown(e) {
-    e = e || window.event;
-    e.preventDefault();
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    document.onmousemove = elementDrag;
-  }
+	function dragMouseDown(e) {
+		e = e || window.event;
+		e.preventDefault();
+		pos3 = e.clientX;
+		pos4 = e.clientY;
+		document.onmouseup = closeDragElement;
+		document.onmousemove = elementDrag;
+	}
 
-  function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    el.style.top = (el.offsetTop - pos2) + "px";
-    el.style.left = (el.offsetLeft - pos1) + "px";
-  }
+	function elementDrag(e) {
+		e = e || window.event;
+		e.preventDefault();
+		pos1 = pos3 - e.clientX;
+		pos2 = pos4 - e.clientY;
+		pos3 = e.clientX;
+		pos4 = e.clientY;
+		el.style.top = (el.offsetTop - pos2) + "px";
+		el.style.left = (el.offsetLeft - pos1) + "px";
+	}
 
-  function closeDragElement() {
-    document.onmouseup = null;
-    document.onmousemove = null;
-    saveBoxLayoutToLocalStorage();
-  }
+	function closeDragElement() {
+		document.onmouseup = null;
+		document.onmousemove = null;
+		saveBoxLayoutToLocalStorage();
+	}
 }
 
 function saveDataToLocalStorage() {
