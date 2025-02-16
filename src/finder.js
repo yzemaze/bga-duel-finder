@@ -333,32 +333,22 @@ function createUi() {
 		//
 		// and format it.
 		const pastedData = (event.clipboardData || window.clipboardData).getData("text");
-		const lines = pastedData.split("\n");
-		const selectedElements = lines.filter((_, index) => (index - 1) % 3 === 0);
-		const vsElements = selectedElements.filter(element => element.trim() === "vs");
-
-		if (selectedElements.length === 0 || selectedElements.length !== vsElements.length) {
-			return;
-		}
 		event.preventDefault();
 
-		const pairs = [];
-		for (let i = 0; i < lines.length; i += 3) {
-			const player0 = lines[i];
-			const player1 = lines[i + 2];
-			if (player0.trim() && player1.trim()) {
-				pairs.push(`${player0.trim()} vs ${player1.trim()}`);
-			}
+		// transform non-empty lines separated by a "vs"-line into one-liners
+		const regex = /([^\r\n]+)\s*\n\s*vs\s*\n\s*([^\r\n]+)/g;
+		let matches = [];
+		let match;
+		while ((match = regex.exec(pastedData)) !== null) {
+			matches.push(`${match[1].trim()} vs ${match[2].trim()}`);
 		}
-		const transformedText = pairs.join("\n");
+		const transformedText = matches.join("\n");
 
 		// Get the current cursor position or selection
 		const start = textArea.selectionStart;
 		const end = textArea.selectionEnd;
-
 		// Insert the transformed text at the cursor position
 		textArea.value = textArea.value.slice(0, start) + transformedText + textArea.value.slice(end);
-
 		// Move the cursor to the end of the inserted text
 		textArea.selectionStart = textArea.selectionEnd = start + transformedText.length;
 	});
