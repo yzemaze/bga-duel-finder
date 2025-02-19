@@ -751,6 +751,9 @@ function dragElement(el) {
 	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 	document.getElementById("finderHead").onmousedown = dragMouseDown;
 
+	const onmouseupBackup = document.onmouseup;
+	const onmousemoveBackup = document.onmousemove;
+
 	function dragMouseDown(e) {
 		e = e || window.event;
 		e.preventDefault();
@@ -772,8 +775,8 @@ function dragElement(el) {
 	}
 
 	function closeDragElement() {
-		document.onmouseup = null;
-		document.onmousemove = null;
+		document.onmouseup = onmouseupBackup;
+		document.onmousemove = onmousemoveBackup;
 		saveBoxLayoutToLocalStorage();
 	}
 }
