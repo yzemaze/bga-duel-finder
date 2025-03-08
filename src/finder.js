@@ -119,6 +119,7 @@ style.innerHTML = `
 		display: grid;
 		grid-template-columns: repeat(3, max-content);
 		grid-gap: 10px;
+		font-size: 1em;
 	}
 	#buttonDiv .bgabutton {
 		margin: 0;
@@ -342,7 +343,7 @@ function createUi() {
 		while ((match = regex.exec(pastedData)) !== null) {
 			matches.push(`${match[1].trim()} vs ${match[2].trim()}`);
 		}
-		const transformedText = matches.join("\n");
+		const transformedText = matches.length > 0 ? matches.join("\n") : pastedData;
 
 		// Get the current cursor position or selection
 		const start = textArea.selectionStart;
