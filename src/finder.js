@@ -606,7 +606,7 @@ async function getAllDuels(allDuelsTxt, day, gameId) {
 					awayTeamScore.id = `${matchIndex}-awayScore`;
 
 					matchScore.appendChild(homeTeamScore);
-					matchScore.appendChild(document.createTextNode("-"));
+					matchScore.appendChild(document.createTextNode(":"));
 					matchScore.appendChild(awayTeamScore);
 					homeTeamScore.innerText = teamWins[0];
 					awayTeamScore.innerText = teamWins[1];
@@ -673,7 +673,7 @@ async function getAllDuels(allDuelsTxt, day, gameId) {
 						wins[1]++;
 					}
 					gameLink.appendChild(homeScore);
-					gameLink.appendChild(document.createTextNode("-"));
+					gameLink.appendChild(document.createTextNode(":"));
 					gameLink.appendChild(awayScore);
 				}
 				gameLink.href = game.url;
@@ -706,7 +706,7 @@ async function getAllDuels(allDuelsTxt, day, gameId) {
 			const homeScore = document.createElement("span");
 			const awayScore = document.createElement("span");
 			duelScore.appendChild(homeScore);
-			duelScore.appendChild(document.createTextNode("-"));
+			duelScore.appendChild(document.createTextNode(":"));
 			duelScore.appendChild(awayScore);
 			homeScore.innerText = wins[0];
 			awayScore.innerText = wins[1];
