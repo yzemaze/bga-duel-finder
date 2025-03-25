@@ -64,7 +64,7 @@ Just leave team names blank if you only need to change gpd (CCL-Finals e.g.)
 ```
 #,,5
 ```
-gpd and dpm are used when calculating whether a result should be bolded (= won duel/match)
+gpd and dpm are used to calculate wins of duels/matches and whether a result should therefore be bolded.
    
 Multiple matches can be displayed at the same time, e.g.:
 - Date: 21-04-2024
@@ -89,7 +89,7 @@ Leuschi vs Wiseman from Arcadia
 ### 💾 Backup & restore data & window layout
 To spare you the hassle of setting things up again and again the script saves the initial config (`date`, status of `show date`, contents of `matches & duels`) as well as the layout and size of the window to the localStorage of your browser.
 This is triggered everytime you click `find duels` or `reload`. This way you don’t need to resize the window after each (re-)start or page reload. Additionally you could config a match for later use.
-If you start the script within 2 hours after your last `find duels` or `reload` action the script will automatically run the find action for the last configured set of duels and displays the results asap. So if you follow a best-of-x and have to open the next game/table clicking the bookmark again should be all you need to do.
+If you start the script within 2 hours after your last `find duels` or `reload` action the last configured set of duels will be loaded automatically and results will be displayed asap. So if you follow a best-of-x and have to open the next game/table clicking the bookmark again should be all you need to do.
 
 ### ⚠️ Do not spam BGA
 Please use the `find duels` and `reload` buttons with caution so BGA doesn’t throttle your connection.
