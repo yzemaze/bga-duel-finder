@@ -687,6 +687,38 @@
 					tableFlags += " 🏟️ ";
 				}
 
+				const params = {
+					id: table.table_id,
+				};
+				const response = dojo.xhrGet({
+					url: "https://boardgamearena.com/table/table/tableinfos.html",
+					content: params,
+					handleAs: "json",
+					headers: { "X-Request-Token": bgaConfig.requestToken },
+					sync: true
+				});
+				let tableClockViolations = [];
+				for (const penalty of Object.entries(response.results[0].data.result.penalties)) {
+					if (penalty[1].clock == "1") {
+						tableClockViolations.push(penalty[0]);
+					}
+				}
+				if (tableClockViolations.length > 0) {
+					tableFlags += ` ${"⏰".repeat(tableClockViolations.length)} `;
+					if (tableClockViolations.length == 2) {
+						tableRanks[0] = 0;
+						tableRanks[1] = 0;
+					} else {
+						if (tableClockViolations[0] == tablePlayers[0]) {
+							tableRanks[0] = 2;
+							tableRanks[1] = 1;
+						} else {
+							tableRanks[0] = 1;
+							tableRanks[1] = 2;
+						}
+					}
+				}
+
 				tables.push({
 					id: table.table_id,
 					url: tableUrl,
@@ -696,7 +728,8 @@
 					startDate: tableStartDate.toISOString().substr(0, 16).replace("T", " "),
 					endDate: tableEndDate.toISOString().substr(0, 16).replace("T", " "),
 					timestamp: table.start,
-					flags: tableFlags
+					flags: tableFlags,
+					clockViolations: tableClockViolations
 				});
 			}
 			tables.sort((a, b) => a.timestamp - b.timestamp);
@@ -877,7 +910,7 @@
 						if (game.rank0 == 1) {
 							homeScore.classList = "win";
 							wins[0]++;
-						} else  {
+						} else {
 							awayScore.classList = "win";
 							wins[1]++;
 						}
