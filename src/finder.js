@@ -770,7 +770,7 @@
 				if (vals.length == 1) {
 					const comment = document.createElement("h2");
 					comment.classList = "dfComment";
-					comment.innerText = vals[0].trim();
+					comment.innerHTML = vals[0].trim();
 					gamesList.appendChild(comment);
 				} else {
 					if (vals[2]) {
