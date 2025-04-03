@@ -409,6 +409,14 @@
 		);
 	}
 
+	function isYesterday(unixTimestamp) {
+		const yesterday = new Date(Date.now - 24*60*60*1000);
+		const date = new Date(unixTimestamp * 1000);
+		return (
+			date.setHours(0,0,0,0) == yesterday.setHours(0,0,0,0)
+		);
+	}
+
 	/**
 	 * Create ui for user interaction.
 	 *
@@ -648,7 +656,9 @@
 			};
 			if (day) {
 				params.start_date = day;
-				params.end_date = day + 86400;
+				const today = new Date();
+				const afterMidnight = today.getHours() < 7;
+				params.end_date = isYesterday(day) && afterMidnight ? day + 86400 * 2 : day + 86400;
 			}
 
 			const response = dojo.xhrGet({
@@ -695,7 +705,7 @@
 				playersUrl += `&start_date=${day}&end_date=${day + 86400}`;
 			}
 
-			if (!day || isToday(day)) {
+			if (!day || isToday(day) || isYesterday(day)) {
 				const table = await getGameInProgress(player0Id, player1Id);
 				if (table) {
 					tables.push({
