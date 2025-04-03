@@ -261,14 +261,11 @@
 			padding: 10px;
 		}
 		.horizontal #gamesList {
-			grid-auto-flow: column;
-			grid-gap: 10px;
+			grid-auto-columns: max-content;
+			grid-gap: 20px;
 		}
 		#finderBox.horizontal h2.matchHeader {
 			margin: 0;
-		}
-		.horizontal .dfComment {
-			min-width: 10em;
 		}
 		.horizontal .fixtureScore, .horizontal .duelScore {
 			grid-column-start: 2;
