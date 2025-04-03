@@ -342,6 +342,7 @@
 			overflow: auto;
 			grid-auto-rows: max-content;
 			grid-gap: 2px;
+			padding-right: 8px;
 		}
 		.duelsView #gamesList {
 			display: grid;
@@ -401,7 +402,7 @@
 	createUi();
 
 	/**
-	 * Check if a date is today
+	 * Check if a date is equal to today or yesterday
 	 */
 	function isToday(unixTimestamp) {
 		const today = new Date();
