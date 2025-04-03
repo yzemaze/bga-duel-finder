@@ -325,16 +325,16 @@
 			height: fit-content;
 			width: fit-content;
 		}
-		#findButton, #closeButton {
+		#dfFindButton, #dfCloseButton {
 			display: block;
 		}
-		#backButton, #reloadButton, #toggleDatesButton {
+		#dfBackButton, #dfReloadButton, #dfToggleDatesButton {
 			display: none;
 		}
-		.duelsView #backButton, .duelsView #reloadButton, .duelsView #toggleDatesButton {
+		.duelsView #dfBackButton, .duelsView #dfReloadButton, .duelsView #dfToggleDatesButton {
 			display: block;
 		}
-		.duelsView #findButton, .duelsView #closeButton, .horizontal #toggleDatesButton {
+		.duelsView #dfFindButton, .duelsView #dfCloseButton, .horizontal #dfToggleDatesButton {
 			display: none;
 		}
 		#gamesList {
@@ -473,23 +473,23 @@
 		const buttonDiv = document.createElement("div");
 		buttonDiv.id = "buttonDiv";
 		const findButton = document.createElement("a");
-		findButton.id = "findButton";
+		findButton.id = "dfFindButton";
 		findButton.classList = "bgabutton bgabutton_blue";
 		findButton.innerText = "Find Duels";
 		const backButton = document.createElement("a");
-		backButton.id = "backButton";
+		backButton.id = "dfBackButton";
 		backButton.classList = "bgabutton bgabutton_red";
 		backButton.innerText = "Back";
 		const closeButton = document.createElement("a");
-		closeButton.id = "closeButton";
+		closeButton.id = "dfCloseButton";
 		closeButton.classList = "bgabutton bgabutton_red";
 		closeButton.innerText = "Close";
 		const reloadButton = document.createElement("a");
-		reloadButton.id = "reloadButton";
+		reloadButton.id = "dfReloadButton";
 		reloadButton.classList = "bgabutton bgabutton_green";
 		reloadButton.innerText = "Reload";
 		const toggleDatesButton = document.createElement("a");
-		toggleDatesButton.id = "toggleDatesButton";
+		toggleDatesButton.id = "dfToggleDatesButton";
 		toggleDatesButton.classList = "bgabutton bgabutton_blue";
 		toggleDatesButton.innerText = "Toggle Dates";
 		buttonDiv.appendChild(closeButton);
@@ -1004,7 +1004,7 @@
 			const lastSaved = dfData.get("lastSaved");
 			if (Date.now() - lastSaved < DATA_CACHE_DURATION) {
 				console.debug("Reloading retrieved data")
-				document.getElementById("findButton").click();
+				document.getElementById("dfFindButton").click();
 				applyBoxLayout();
 			}
 		} else {
