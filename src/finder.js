@@ -211,7 +211,6 @@
 		["Zimbabwe", "🇿🇼"]
 	]);
 
-
 	let style = document.createElement("style");
 	style.innerHTML = `
 		.drag-handle {
@@ -229,6 +228,7 @@
 			bottom: 0px;
 			width: max-content;
 			min-width: fit-content;
+			max-width: 100%;
 			height: max-content;
 			min-height: 110px;
 			background: #f0f0f0;
@@ -244,31 +244,6 @@
 		#finderBox .duel a {
 			color: rgb(72, 113, 182);
 			text-decoration: none;
-		}
-		#finderBox.horizontal {
-			grid-auto-flow: column;
-			grid-template-columns: max-content 1fr max-content;
-			grid-template-rows: none;
-			min-height: 62px;
-		}
-		.horizontal #finderHead {
-			padding: 10px;
-		}
-		.horizontal #finderBody {
-			grid-template-rows: none;
-			grid-auto-flow: column;
-			grid-template-columns: 1fr auto;
-			padding: 10px;
-		}
-		.horizontal #gamesList {
-			grid-auto-columns: max-content;
-			grid-gap: 20px;
-		}
-		#finderBox.horizontal h2.matchHeader {
-			margin: 0;
-		}
-		.horizontal .fixtureScore, .horizontal .duelScore {
-			grid-column-start: 2;
 		}
 		#finderBox h2 {
 			font-weight: normal;
@@ -392,6 +367,32 @@
 		}
 		span.progress {
 			grid-column: 3 span;
+		}
+		#finderBox.horizontal {
+			grid-auto-flow: column;
+			grid-template-columns: max-content 1fr max-content;
+			grid-template-rows: none;
+			min-height: 62px;
+		}
+		.horizontal #finderHead {
+			padding: 10px;
+		}
+		.horizontal #finderBody {
+			grid-template-rows: none;
+			grid-auto-flow: column;
+			grid-template-columns: 1fr auto;
+			padding: 10px;
+		}
+		.horizontal #gamesList {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 2px 1em;
+		}
+		#finderBox.horizontal h2.matchHeader {
+			margin: 0;
+		}
+		.horizontal .fixtureScore, .horizontal .duelScore {
+			grid-column-start: 2;
 		}
 	 `;
 	document.head.appendChild(style);
