@@ -335,6 +335,9 @@
 			display: grid;
 			grid-template-rows: max-content 1fr;
 		}
+		.duel ~ .break {
+			width: 100%;
+		}
 		#gamesList.noDates .resultDate {
 			display: none;
 		}
@@ -822,6 +825,10 @@
 						nMatches = vals[3].trim();
 					}
 					if (vals[0] != "" && vals[1] != "") {
+						const breakItem = document.createElement("li");
+						breakItem.classList = "break";
+						gamesList.appendChild(breakItem);
+
 						let homeTeam = vals[0].trim();
 						let awayTeam = vals[1].trim();
 						if (flags.get(homeTeam)) {
