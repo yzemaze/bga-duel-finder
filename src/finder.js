@@ -258,15 +258,15 @@
 		#finderHead {
 			background: #4871b6;
 			color: #fff;
-			padding: 5px 10px;
+			padding: 0.2em 0.4em;
 			user-select: none;
 		}
 		#finderBody {
 			display: grid;
 			grid-template-rows: 1fr max-content;
-			grid-gap: 10px;
 			overflow: auto;
-			padding: 5px 10px 10px 10px;
+			grid-gap: 0.5em;
+			padding: 0.2em 0.4em 0.4em 0.4em;
 		}
 		#inputForm {
 			display: grid;
@@ -274,7 +274,7 @@
 		}
 		#inputForm input {
 			width: fit-content;
-			border-radius: 5px;
+			border-radius: 0.3em;
 		}
 		.duelsView #inputForm {
 			display: none;
@@ -284,18 +284,19 @@
 		}
 		#duelsConfig {
 			width: 100%;
-			border-radius: 5px;
+			border-radius: 0.3em;
 		}
 		#buttonDiv {
 			display: grid;
 			grid-template-columns: repeat(3, max-content);
-			grid-gap: 10px;
+			grid-gap: 0.5em;
 			font-size: 1em;
 		}
 		#buttonDiv .bgabutton {
 			margin: 0;
 			height: fit-content;
 			width: fit-content;
+			padding: 0.4em 0.8em;
 		}
 		#dfFindButton, #dfCloseButton {
 			display: block;
@@ -313,8 +314,8 @@
 			display: none;
 			overflow: auto;
 			grid-auto-rows: max-content;
-			grid-gap: 2px;
-			padding-right: 8px;
+			grid-gap: 0.1em;
+			padding-right: 0.4em;
 		}
 		.duelsView #gamesList {
 			display: grid;
@@ -326,7 +327,10 @@
 			grid-gap: 0.4em;
 		}
 		#finderBox .matchHeader {
-			margin: 10px 0 5px 0;
+			margin: 0.3em 0 0.2em 0;
+		}
+		#finderBox .matchHeader:first-of-type {
+			margin-top: 0;
 		}
 		.fixtureScore, .duelScore {
 			grid-column-start: 3;
@@ -355,7 +359,7 @@
 		li.result {
 			display: grid;
 			grid-template-columns: repeat(3, max-content);
-			grid-gap: 5px;
+			grid-gap: 0.3em;
 			align-items: end;
 		}
 		li.result .resultDate {
@@ -379,21 +383,21 @@
 			grid-auto-flow: column;
 			grid-template-columns: max-content 1fr max-content;
 			grid-template-rows: none;
-			min-height: 62px;
+			min-height: 3em;
 		}
 		.horizontal #finderHead {
-			padding: 10px;
+			padding: 0.5em;
 		}
 		.horizontal #finderBody {
 			grid-template-rows: none;
 			grid-auto-flow: column;
 			grid-template-columns: 1fr auto;
-			padding: 10px;
+			padding: 0.5em;
 		}
 		.horizontal #gamesList {
 			display: flex;
 			flex-wrap: wrap;
-			gap: 2px 1em;
+			gap: 0.15em 1em;
 		}
 		#finderBox.horizontal h2.matchHeader {
 			margin: 0;
