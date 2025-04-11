@@ -219,80 +219,78 @@
 		.dragging{
 			cursor: move !important;
 		}
-		#finderBox {
+		#dfBox {
 			box-sizing: border-box;
 			display: grid;
 			grid-template-rows: max-content 1fr;
 			position: absolute;
-			left: 0px;
-			bottom: 0px;
+			left: 0;
+			bottom: 0;
 			width: max-content;
 			min-width: fit-content;
-			max-width: 100%;
 			height: max-content;
 			min-height: 110px;
+			font-size: 1em;
 			background: #f0f0f0;
-			box-shadow: 0 3px 8px rgba(0,0,0,.3);
-			border-radius: 8px;
+			box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.3);
+			border-radius: 0.5em;
 			z-index: 10000;
 			resize: both;
 			overflow: hidden;
 		}
-		#finderBox * {
-			box-sizing: border-box;
-		}
-		#finderBox .duel a {
+		#dfBox .duel a {
 			color: rgb(72, 113, 182);
 			text-decoration: none;
 		}
-		#finderBox h2 {
+		#dfBox h2 {
+			font-size: 1.1em;
 			font-weight: normal;
 			margin: 0;
 		}
-		#finderBox .bga-link {
+		#dfBox .bga-link {
 			font-weight: normal;
 		}
-		#finderBox h2.dfComment {
+		#dfBox h2.dfComment {
 			font-weight: bold;
 		}
-		#finderHead {
+		#dfHead {
 			background: #4871b6;
 			color: #fff;
 			padding: 0.2em 0.4em;
 			user-select: none;
 		}
-		#finderBody {
+		#dfBody {
 			display: grid;
 			grid-template-rows: 1fr max-content;
 			overflow: auto;
 			grid-gap: 0.5em;
 			padding: 0.2em 0.4em 0.4em 0.4em;
 		}
-		#inputForm {
+		#dfInputForm {
 			display: grid;
 			grid-template-rows: repeat(3, max-content) 1fr;
 		}
-		#inputForm input {
+		#dfInputForm input {
 			width: fit-content;
 			border-radius: 0.3em;
 		}
-		.duelsView #inputForm {
+		.duelsView #dfInputForm {
 			display: none;
 		}
-		#duelsConfig, #duelsConfigLabel {
+		#dfConfig, #dfConfigLabel {
 			grid-column: span 2;
 		}
-		#duelsConfig {
+		#dfConfig {
 			width: 100%;
 			border-radius: 0.3em;
 		}
-		#buttonDiv {
+		#dfButtonDiv {
 			display: grid;
 			grid-template-columns: repeat(3, max-content);
 			grid-gap: 0.5em;
 			font-size: 1em;
 		}
-		#buttonDiv .bgabutton {
+		#dfBox .bgabutton {
 			margin: 0;
 			height: fit-content;
 			width: fit-content;
@@ -310,14 +308,14 @@
 		.duelsView #dfFindButton, .duelsView #dfCloseButton, .horizontal #dfToggleDatesButton {
 			display: none;
 		}
-		#gamesList {
+		#dfGamesList {
 			display: none;
 			overflow: auto;
 			grid-auto-rows: max-content;
 			grid-gap: 0.1em;
 			padding-right: 0.4em;
 		}
-		.duelsView #gamesList {
+		.duelsView #dfGamesList {
 			display: grid;
 		}
 		.matchHeader, .duelHeader {
@@ -326,10 +324,10 @@
 			grid-template-rows: 1fr;
 			grid-gap: 0.4em;
 		}
-		#finderBox .matchHeader {
+		#dfBox .matchHeader {
 			margin: 0.3em 0 0.2em 0;
 		}
-		#finderBox .matchHeader:first-of-type {
+		#dfBox .matchHeader:first-of-type {
 			margin-top: 0;
 		}
 		.fixtureScore, .duelScore {
@@ -346,13 +344,13 @@
 			display: grid;
 			width: 100%;
 		}
-		#gamesList.noDates .resultDate {
+		#dfGamesList.noDates .resultDate {
 			display: none;
 		}
-		#gamesList.noDates ul.duelGamesList > li {
+		#dfGamesList.noDates ul.duelGamesList > li {
 			display: inline;
 		}
-		#gamesList.noDates ul.duelGamesList > li:not(:last-child)::after {
+		#dfGamesList.noDates ul.duelGamesList > li:not(:last-child)::after {
 			content: " • ";
 			color: #888;
 		}
@@ -379,27 +377,27 @@
 		span.progress {
 			grid-column: 3 span;
 		}
-		#finderBox.horizontal {
+		#dfBox.horizontal {
 			grid-auto-flow: column;
 			grid-template-columns: max-content 1fr max-content;
 			grid-template-rows: none;
 			min-height: 3em;
 		}
-		.horizontal #finderHead {
+		.horizontal #dfHead {
 			padding: 0.5em;
 		}
-		.horizontal #finderBody {
+		.horizontal #dfBody {
 			grid-template-rows: none;
 			grid-auto-flow: column;
 			grid-template-columns: 1fr auto;
 			padding: 0.5em;
 		}
-		.horizontal #gamesList {
+		.horizontal #dfGamesList {
 			display: flex;
 			flex-wrap: wrap;
 			gap: 0.15em 1em;
 		}
-		#finderBox.horizontal h2.matchHeader {
+		#dfBox.horizontal h2.matchHeader {
 			margin: 0;
 		}
 		.horizontal .fixtureScore, .horizontal .duelScore {
@@ -434,29 +432,33 @@
 	 *
 	 */
 	function createUi() {
-		const finderId = "finderBox";
-		let finderBox = document.getElementById(finderId);
-		if (finderBox) {
-			finderBox.style.display = "grid";
+		const finderId = "dfBox";
+		let dfBox = document.getElementById(finderId);
+		if (dfBox) {
+			dfBox.style.display = "grid";
 			return;
 		}
 
-		finderBox = document.createElement("div");
-		finderBox.id = finderId;
-		finderBox.setAttribute("data-draggable", true);
-		finderBox.setAttribute("data-resizable", true);
-		const finderHead = document.createElement("h2");
-		finderHead.id = "finderHead";
-		finderHead.setAttribute("data-drag-handle", true);
-		finderHead.innerText = "Duel Finder 2";
-		finderHead.classList.add("drag-handle");
-		const finderBody = document.createElement("div");
-		finderBody.id = "finderBody";
-		finderBox.appendChild(finderHead);
-		finderBox.appendChild(finderBody);
+		dfBox = document.createElement("div");
+		dfBox.id = finderId;
+		dfBox.setAttribute("data-draggable", true);
+		dfBox.setAttribute("data-resizable", true);
+		const dfHead = document.createElement("div");
+		dfHead.setAttribute("data-drag-handle", true);
+		dfHead.id = "dfHead";
+		dfHead.classList.add("drag-handle");
+		const dfHeader = document.createElement("h2");
+		dfHeader.id = "dfHeader";
+		dfHeader.innerText = "Duel Finder 2";
+		const dfBody = document.createElement("div");
+		dfBody.id = "dfBody";
 
-		const inputForm = document.createElement("form");
-		inputForm.id = "inputForm";
+		dfHead.appendChild(dfHeader);
+		dfBox.appendChild(dfHead);
+		dfBox.appendChild(dfBody);
+
+		const dfInputForm = document.createElement("form");
+		dfInputForm.id = "dfInputForm";
 		const datePicker = document.createElement("input");
 		datePicker.id = "datePicker";
 		datePicker.type = "date";
@@ -472,24 +474,24 @@
 		dateShowLabel.htmlFor = "dateShow";
 		dateShowLabel.textContent = "Show dates";
 		const textArea = document.createElement("textArea");
-		textArea.id = "duelsConfig";
+		textArea.id = "dfConfig";
 		const textAreaLabel = document.createElement("label");
-		textAreaLabel.id = "duelsConfigLabel";
-		textAreaLabel.htmlFor = "duelsConfig";
+		textAreaLabel.id = "dfConfigLabel";
+		textAreaLabel.htmlFor = "dfConfig";
 		textAreaLabel.textContent = "Matches & duels";
 
-		inputForm.appendChild(datePickerLabel);
-		inputForm.appendChild(datePicker);
-		inputForm.appendChild(dateShowLabel);
-		inputForm.appendChild(dateShow);
-		inputForm.appendChild(textAreaLabel);
-		inputForm.appendChild(textArea);
+		dfInputForm.appendChild(datePickerLabel);
+		dfInputForm.appendChild(datePicker);
+		dfInputForm.appendChild(dateShowLabel);
+		dfInputForm.appendChild(dateShow);
+		dfInputForm.appendChild(textAreaLabel);
+		dfInputForm.appendChild(textArea);
 
-		const gamesList = document.createElement("ul");
-		gamesList.id = "gamesList";
+		const dfGamesList = document.createElement("ul");
+		dfGamesList.id = "dfGamesList";
 
-		const buttonDiv = document.createElement("div");
-		buttonDiv.id = "buttonDiv";
+		const dfButtonDiv = document.createElement("div");
+		dfButtonDiv.id = "dfButtonDiv";
 		const findButton = document.createElement("a");
 		findButton.id = "dfFindButton";
 		findButton.classList = "bgabutton bgabutton_blue";
@@ -510,20 +512,33 @@
 		toggleDatesButton.id = "dfToggleDatesButton";
 		toggleDatesButton.classList = "bgabutton bgabutton_blue";
 		toggleDatesButton.innerText = "📅";
-		buttonDiv.appendChild(closeButton);
-		buttonDiv.appendChild(findButton);
-		buttonDiv.appendChild(backButton);
-		buttonDiv.appendChild(reloadButton);
-		buttonDiv.appendChild(toggleDatesButton);
+		dfButtonDiv.appendChild(closeButton);
+		dfButtonDiv.appendChild(findButton);
+		dfButtonDiv.appendChild(backButton);
+		dfButtonDiv.appendChild(reloadButton);
+		dfButtonDiv.appendChild(toggleDatesButton);
 
-		finderBody.appendChild(inputForm);
-		finderBody.appendChild(gamesList);
-		finderBody.appendChild(buttonDiv);
+		dfBody.appendChild(dfInputForm);
+		dfBody.appendChild(dfGamesList);
+		dfBody.appendChild(dfButtonDiv);
 
-		document.body.appendChild(finderBox);
-		applyBoxLayout(finderBox);
+		document.body.appendChild(dfBox);
+		applyBoxLayout(dfBox);
 
-		finderHead.ondblclick = function() { applyBoxLayout(finderBox, "toggle") };
+		dfHead.ondblclick = function() { applyBoxLayout(dfBox, "toggle") };
+
+		function zoom(event) {
+			event.preventDefault();
+			let scale = 1;
+			if (dfBox.style.transform) {
+				scale = parseFloat(dfBox.style.transform.match(/scale\(([^)]+)\)/)[1]);
+			}
+			scale += event.deltaY * -0.001 / 9;
+			scale = Math.min(Math.max(0.5, scale), 2);
+			dfBox.style.transform = `scale(${scale})`;
+			saveBoxLayoutToLocalStorage(dfBox);
+		}
+		dfBox.onwheel = zoom;
 
 		let timeout;
 		const resizeObserver = new ResizeObserver(entries => {
@@ -536,7 +551,7 @@
 				});
 			}, 1000);
 		});
-		resizeObserver.observe(finderBox);
+		resizeObserver.observe(dfBox);
 
 		textArea.addEventListener("paste", (event) => {
 			// Just check if pasted text is in the form of:
@@ -579,20 +594,20 @@
 			textArea.disabled = true;
 			findButton.disabled = true;
 			saveDataToLocalStorage();
-			document.getElementById("finderBody").classList.toggle("duelsView");
-			gamesList.classList = dateShow.checked ? "" : "noDates";
+			document.getElementById("dfBody").classList.toggle("duelsView");
+			dfGamesList.classList = dateShow.checked ? "" : "noDates";
 			await getAllDuels(duelsText, unixTimestamp, gameId);
 			findButton.disabled = false;
 		};
 
 		backButton.onclick = function () {
-			document.getElementById("finderBody").classList.toggle("duelsView");
-			gamesList.innerHTML = "";
+			document.getElementById("dfBody").classList.toggle("duelsView");
+			dfGamesList.innerHTML = "";
 			textArea.disabled = false;
 		};
 
 		closeButton.onclick = function () {
-			document.body.removeChild(finderBox);
+			document.body.removeChild(dfBox);
 		}
 
 		reloadButton.onclick = async function () {
@@ -600,12 +615,12 @@
 			const date = new Date(datePicker.value);
 			const unixTimestamp = Math.floor(date.getTime() / 1000);
 			const duelsText = textArea.value;
-			gamesList.innerHTML = "";
+			dfGamesList.innerHTML = "";
 			await getAllDuels(duelsText, unixTimestamp, gameId);
 		}
 
 		toggleDatesButton.onclick = function () {
-			document.getElementById("gamesList").classList.toggle("noDates");
+			document.getElementById("dfGamesList").classList.toggle("noDates");
 		}
 
 		retrieveDataFromLocalStorage();
@@ -804,7 +819,7 @@
 	}
 
 	async function getAllDuels(allDuelsTxt, day, gameId) {
-		const gamesList = document.getElementById("gamesList");
+		const dfGamesList = document.getElementById("dfGamesList");
 		const duelsTxt = allDuelsTxt.split("\n");
 		const vsRegex = new RegExp(" vs ", "i");
 		let matchIndex = -1;
@@ -824,7 +839,7 @@
 					const comment = document.createElement("h2");
 					comment.classList = "dfComment";
 					comment.innerHTML = vals[0].trim();
-					gamesList.appendChild(comment);
+					dfGamesList.appendChild(comment);
 				} else {
 					if (vals[2]) {
 						nGames = vals[2].trim();
@@ -835,7 +850,7 @@
 					if (vals[0] != "" && vals[1] != "") {
 						const breakItem = document.createElement("li");
 						breakItem.classList = "break";
-						gamesList.appendChild(breakItem);
+						dfGamesList.appendChild(breakItem);
 
 						let homeTeam = vals[0].trim();
 						let awayTeam = vals[1].trim();
@@ -875,7 +890,7 @@
 						homeTeamScore.innerText = teamWins[0];
 						awayTeamScore.innerText = teamWins[1];
 						matchHeader.appendChild(matchScore);
-						gamesList.appendChild(matchHeader);
+						dfGamesList.appendChild(matchHeader);
 					}
 				}
 			} else {
@@ -998,17 +1013,17 @@
 				duelHeader.appendChild(duelScore);
 				duel.appendChild(duelHeader);
 				duel.appendChild(duelGamesList);
-				gamesList.appendChild(duel);
+				dfGamesList.appendChild(duel);
 			}
 		}
 		return true;
 	}
 
-	dragElement(document.getElementById("finderBox"));
+	dragElement(document.getElementById("dfBox"));
 
 	function dragElement(el) {
 		var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-		document.getElementById("finderHead").onmousedown = dragMouseDown;
+		document.getElementById("dfHead").onmousedown = dragMouseDown;
 
 		const onmouseupBackup = document.onmouseup;
 		const onmousemoveBackup = document.onmousemove;
@@ -1044,7 +1059,7 @@
 		let dfData = new Map();
 		dfData.set("datePicker", document.getElementById("datePicker").value);
 		dfData.set("dateShow", document.getElementById("dateShow").checked);
-		dfData.set("duelsConfig", document.getElementById("duelsConfig").value);
+		dfData.set("dfConfig", document.getElementById("dfConfig").value);
 		dfData.set("lastSaved", Date.now());
 		localStorage.setItem("dfData", JSON.stringify([...dfData]));
 		console.debug("Data saved to localStorage");
@@ -1055,8 +1070,8 @@
 		if (dfData) {
 			document.getElementById("datePicker").value = dfData.get("datePicker");
 			document.getElementById("dateShow").checked = eval(dfData.get("dateShow"));
-			const duelData = dfData.get("duelsConfig") ?? "";
-			document.getElementById("duelsConfig").value = duelData;
+			const duelData = dfData.get("dfConfig") ?? "";
+			document.getElementById("dfConfig").value = duelData;
 			console.debug("Data retrieved from localStorage");
 			const lastSaved = dfData.get("lastSaved");
 			if (Date.now() - lastSaved < DATA_CACHE_DURATION) {
@@ -1070,7 +1085,7 @@
 	}
 
 	function saveBoxLayoutToLocalStorage(box) {
-		const el = box ?? document.getElementById("finderBox");
+		const el = box ?? document.getElementById("dfBox");
 		const orientation = el.classList.contains("horizontal") ? "h" : "v";
 		let dfBoxAttrs = new Map();
 		if (localStorage.dfBoxAttrs) {
@@ -1081,6 +1096,7 @@
 			"width": el.style.width,
 			"top": el.style.top,
 			"left": el.style.left,
+			"transform": el.style.transform,
 		});
 		dfBoxAttrs.set("savedOrientation", orientation);
 		localStorage.setItem("dfBoxAttrs", JSON.stringify([...dfBoxAttrs]));
@@ -1088,7 +1104,7 @@
 	}
 
 	function applyBoxLayout(box, mode) {
-		const el = box ?? document.getElementById("finderBox");
+		const el = box ?? document.getElementById("dfBox");
 		let orientation = "";
 		if (mode == "toggle") {
 			el.classList.toggle("horizontal");
@@ -1102,14 +1118,15 @@
 			orientation = "v";
 		}
 		el.classList = orientation == "h" ? "horizontal" : "";
-		const finderHead = document.getElementById("finderHead");
-		finderHead.innerText = orientation == "h" ? "DF2" : "Duel Finder 2";
+		const dfHeader = document.getElementById("dfHeader");
+		dfHeader.innerText = orientation == "h" ? "DF2" : "Duel Finder 2";
 		if (localStorage.dfBoxAttrs) {
 			const dfBoxAttrs = new Map(JSON.parse(localStorage.dfBoxAttrs));
 			el.style.height = dfBoxAttrs.get(orientation)["height"];
 			el.style.width = dfBoxAttrs.get(orientation)["width"];
 			el.style.top = dfBoxAttrs.get(orientation)["top"];
 			el.style.left = dfBoxAttrs.get(orientation)["left"];
+			el.style.transform = dfBoxAttrs.get(orientation)["transform"];
 		} else if (orientation == "h") {
 			el.style.height = "62px";
 			el.style.width = "max-content";
