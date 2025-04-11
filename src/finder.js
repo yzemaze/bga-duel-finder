@@ -335,7 +335,11 @@
 			display: grid;
 			grid-template-rows: max-content 1fr;
 		}
+		.break {
+			display: none;
+		}
 		.duel ~ .break {
+			display: grid;
 			width: 100%;
 		}
 		#gamesList.noDates .resultDate {
