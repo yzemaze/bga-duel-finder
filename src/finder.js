@@ -445,12 +445,12 @@
 		finderBox.id = finderId;
 		finderBox.setAttribute("data-draggable", true);
 		finderBox.setAttribute("data-resizable", true);
-		let finderHead = document.createElement("h2");
+		const finderHead = document.createElement("h2");
 		finderHead.id = "finderHead";
 		finderHead.setAttribute("data-drag-handle", true);
 		finderHead.innerText = "Duel Finder 2";
 		finderHead.classList.add("drag-handle");
-		let finderBody = document.createElement("div");
+		const finderBody = document.createElement("div");
 		finderBody.id = "finderBody";
 		finderBox.appendChild(finderHead);
 		finderBox.appendChild(finderBody);
