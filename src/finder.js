@@ -126,6 +126,7 @@
 		["Mauritania", "🇲🇷"],
 		["Mauritius", "🇲🇺"],
 		["Mexico", "🇲🇽"],
+		["México", "🇲🇽"],
 		["Micronesia", "🇫🇲"],
 		["Moldova", "🇲🇩"],
 		["Monaco", "🇲🇨"],
@@ -895,7 +896,7 @@
 				}
 			} else {
 				// Get players
-				let players = duelTxt.split(/\d+\. | vs | - | – /);
+				let players = duelTxt.split(/\d+\.\s+| vs | - | – /);
 				players = players.filter(e => e);
 				if (players.length !== 2) {
 					console.error(`Could not get players for "${duelTxt}"`);
