@@ -495,7 +495,7 @@
 		dfButtonDiv.id = "dfButtonDiv";
 		const findButton = document.createElement("a");
 		findButton.id = "dfFindButton";
-		findButton.classList = "bgabutton bgabutton_blue";
+		findButton.classList = "bgabutton bgabutton_green";
 		findButton.innerText = "➡";
 		const backButton = document.createElement("a");
 		backButton.id = "dfBackButton";
