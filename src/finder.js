@@ -684,9 +684,7 @@
 			};
 			if (day) {
 				params.start_date = day;
-				const today = new Date();
-				const afterMidnight = today.getHours() < 7;
-				params.end_date = isYesterday(day) && afterMidnight ? day + 86400 * 2 : day + 86400;
+				params.end_date = day + 86400 * 2; // include games played after midnight UTC
 			}
 
 			const response = dojo.xhrGet({
