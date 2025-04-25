@@ -672,7 +672,7 @@
 	 *
 	 */
 	async function getGames(player0, player1, day, gameId) {
-		const tables = [];
+		let tables = [];
 		try {
 			const player0Id = getPlayerId(player0);
 			const player1Id = getPlayerId(player1);
@@ -761,6 +761,13 @@
 				});
 			}
 			tables.sort((a, b) => a.timestamp - b.timestamp);
+			// remove tables played earlier on match day
+			if (day && tables.length > 0) {
+				const lastTimestamp = tables[tables.length - 1].timestamp;
+				const thresholdTime = lastTimestamp - ((tables.length + 1) * 60 * 60);
+				tables = tables.filter(table => table.timestamp >= thresholdTime);
+			}
+
 			let playersUrl = `https://boardgamearena.com/gamestats?player=${player0Id}&opponent_id=${player1Id}&game_id=${gameId}&finished=0`;
 			if (day) {
 				playersUrl += `&start_date=${day}&end_date=${day + 86400}`;
