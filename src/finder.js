@@ -467,13 +467,13 @@
 		const datePickerLabel = document.createElement("label");
 		datePickerLabel.htmlFor = "datePicker";
 		datePickerLabel.textContent = "Date";
-		const dateShow = document.createElement("input");
-		dateShow.type = "checkbox";
-		dateShow.id = "dateShow";
-		dateShow.checked = false;
-		const dateShowLabel = document.createElement("label");
-		dateShowLabel.htmlFor = "dateShow";
-		dateShowLabel.textContent = "Show dates";
+		const hidePremature = document.createElement("input");
+		hidePremature.type = "checkbox";
+		hidePremature.id = "hidePremature";
+		hidePremature.checked = true;
+		const hidePrematureLabel = document.createElement("label");
+		hidePrematureLabel.htmlFor = "hidePremature";
+		hidePrematureLabel.textContent = "Hide premature games";
 		const textArea = document.createElement("textArea");
 		textArea.id = "dfConfig";
 		const textAreaLabel = document.createElement("label");
@@ -483,8 +483,8 @@
 
 		dfInputForm.appendChild(datePickerLabel);
 		dfInputForm.appendChild(datePicker);
-		dfInputForm.appendChild(dateShowLabel);
-		dfInputForm.appendChild(dateShow);
+		dfInputForm.appendChild(hidePrematureLabel);
+		dfInputForm.appendChild(hidePremature);
 		dfInputForm.appendChild(textAreaLabel);
 		dfInputForm.appendChild(textArea);
 
@@ -596,7 +596,7 @@
 			findButton.disabled = true;
 			saveDataToLocalStorage();
 			document.getElementById("dfBody").classList.toggle("duelsView");
-			dfGamesList.classList = dateShow.checked ? "" : "noDates";
+			dfGamesList.classList = "noDates";
 			await getAllDuels(duelsText, unixTimestamp, gameId);
 			findButton.disabled = false;
 		};
@@ -671,7 +671,7 @@
 	 * Return games for two players in a given day
 	 *
 	 */
-	async function getGames(player0, player1, day, gameId) {
+	async function getGames(player0, player1, day, gameId, hidePremature) {
 		let tables = [];
 		try {
 			const player0Id = getPlayerId(player0);
@@ -762,7 +762,7 @@
 			}
 			tables.sort((a, b) => a.timestamp - b.timestamp);
 			// remove tables played earlier on match day
-			if (day && tables.length > 0) {
+			if (hidePremature && day && tables.length > 0) {
 				const lastTimestamp = tables[tables.length - 1].timestamp;
 				const thresholdTime = lastTimestamp - ((tables.length + 1) * 60 * 60);
 				tables = tables.filter(table => table.timestamp >= thresholdTime);
@@ -827,6 +827,7 @@
 	}
 
 	async function getAllDuels(allDuelsTxt, day, gameId) {
+		const hidePremature = document.getElementById("hidePremature").checked;
 		const dfGamesList = document.getElementById("dfGamesList");
 		const duelsTxt = allDuelsTxt.split("\n");
 		const vsRegex = new RegExp(" vs ", "i");
@@ -912,7 +913,7 @@
 				players = [players[0].trim(), players[1].trim()];
 
 				await sleep(REQUEST_INTERVAL);
-				const gamesData = await getGames(players[0], players[1], day, gameId);
+				const gamesData = await getGames(players[0], players[1], day, gameId, hidePremature);
 				const games = gamesData.tables;
 
 				const duelGamesList = document.createElement("ul");
@@ -1066,7 +1067,7 @@
 	function saveDataToLocalStorage() {
 		let dfData = new Map();
 		dfData.set("datePicker", document.getElementById("datePicker").value);
-		dfData.set("dateShow", document.getElementById("dateShow").checked);
+		dfData.set("hidePremature", document.getElementById("hidePremature").checked);
 		dfData.set("dfConfig", document.getElementById("dfConfig").value);
 		dfData.set("lastSaved", Date.now());
 		localStorage.setItem("dfData", JSON.stringify([...dfData]));
@@ -1077,7 +1078,7 @@
 		const dfData = new Map(JSON.parse(localStorage.dfData));
 		if (dfData) {
 			document.getElementById("datePicker").value = dfData.get("datePicker");
-			document.getElementById("dateShow").checked = eval(dfData.get("dateShow"));
+			document.getElementById("hidePremature").checked = eval(dfData.get("hidePremature"));
 			const duelData = dfData.get("dfConfig") ?? "";
 			document.getElementById("dfConfig").value = duelData;
 			console.debug("Data retrieved from localStorage");
