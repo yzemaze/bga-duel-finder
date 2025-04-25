@@ -270,6 +270,8 @@
 		#dfInputForm {
 			display: grid;
 			grid-template-rows: repeat(3, max-content) 1fr;
+			grid-template-columns: max-content 1fr;
+			grid-gap: 0 0.5em;
 		}
 		#dfInputForm input {
 			width: fit-content;
