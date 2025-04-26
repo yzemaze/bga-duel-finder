@@ -387,7 +387,8 @@
 			min-height: 3em;
 		}
 		.horizontal #dfHead {
-			padding: 0.5em;
+			padding: 0.5em 0.2em;
+			writing-mode: tb;
 		}
 		.horizontal #dfBody {
 			grid-template-rows: none;
@@ -399,6 +400,13 @@
 			display: flex;
 			flex-wrap: wrap;
 			gap: 0.15em 1em;
+		}
+		.horizontal #dfButtonDiv {
+			grid-template-columns: 1fr;
+			grid-template-rows: repeat(3, max-content);
+		}
+		#dfBox.horizontal .duelsView .bgabutton {
+			padding: 0.2em 0.4em;
 		}
 		#dfBox.horizontal h2.matchHeader {
 			margin: 0;
