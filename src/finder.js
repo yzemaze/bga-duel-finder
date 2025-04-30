@@ -12,6 +12,7 @@
 	const REQUEST_INTERVAL = 250; // ms
 	const CACHE_DURATION = 7*24*60*60*1000; // 7d in ms
 	const DATA_CACHE_DURATION = 2*60*60*1000; // 2h in ms
+	const ENDGAME_THRESHOLD = 70;
 	let flags = new Map([
 		["Afghanistan", "🇦🇫"],
 		["Albania", "🇦🇱"],
@@ -793,7 +794,7 @@
 						timestamp: table.gamestart,
 						startDate: (new Date(table.gamestart * 1000)).toISOString().substr(0, 16).replace("T", " "),
 						endDate: `${(new Date(table.gamestart * 1000)).toISOString().substr(0, 10)} __:__`,
-						flags: " 🔥 "
+						flags: `${table.progression >= ENDGAME_THRESHOLD ? " 🔥 " : ""}`
 					});
 				}
 			}
@@ -950,6 +951,7 @@
 					if (game.progress) {
 						const progressSpan = document.createElement("span");
 						progressSpan.classList.add("progress");
+						if (game.progress >= 70) { progressSpan.classList.add("endgame"); }
 						progressSpan.innerText = `${game.progress}%`;
 						gameLink.appendChild(progressSpan);
 					} else {
