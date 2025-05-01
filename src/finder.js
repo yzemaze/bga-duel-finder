@@ -1039,7 +1039,14 @@
 				dfGamesList.appendChild(duel);
 			}
 		}
+		saveHomePlayersToLocalStorage();
 		return true;
+	}
+
+	function saveHomePlayersToLocalStorage() {
+		const homePlayers = Array.from(document.querySelectorAll("#dfBox .duelHome")).map(el => el.innerText);
+		localStorage.setItem("dfHomePlayers", JSON.stringify(homePlayers));
+		console.debug("Home players’ names saved to localStorage");
 	}
 
 	dragElement(document.getElementById("dfBox"));
@@ -1089,8 +1096,8 @@
 	}
 
 	function retrieveDataFromLocalStorage() {
-		const dfData = new Map(JSON.parse(localStorage.dfData));
-		if (dfData) {
+		if (localStorage.dfData) {
+			const dfData = new Map(JSON.parse(localStorage.dfData));
 			document.getElementById("datePicker").value = dfData.get("datePicker");
 			document.getElementById("hidePremature").checked = eval(dfData.get("hidePremature"));
 			const duelData = dfData.get("dfConfig") ?? "";
