@@ -987,7 +987,9 @@
 
 				const duelLink = document.createElement("a");
 				const duelHome = document.createElement("span");
+				duelHome.classList.add("duelHome");
 				const duelAway = document.createElement("span");
+				duelAway.classList.add("duelAway");
 				duelLink.appendChild(duelHome);
 				duelLink.appendChild(document.createTextNode(" – "));
 				duelLink.appendChild(duelAway);
@@ -1006,8 +1008,8 @@
 				awayScore.innerText = wins[1];
 
 				if (wins[0] >= nGames/2 && wins[0] > wins[1]) {
-					duelHome.classList = "win";
-					homeScore.classList = "win";
+					duelHome.classList.add("win");
+					homeScore.classList.add("win");
 					if (matchIndex > -1) {
 						teamWins[0]++;
 						let homeTeamScoreEl = document.getElementById(`${matchIndex}-homeScore`);
@@ -1018,8 +1020,8 @@
 						}
 					}
 				} else if (wins[1] >= nGames/2 && wins[1] > wins[0]) {
-					duelAway.classList = "win";
-					awayScore.classList = "win";
+					duelAway.classList.add("win");
+					awayScore.classList.add("win");
 					if (matchIndex > -1) {
 						teamWins[1]++;
 						let awayTeamScoreEl = document.getElementById(`${matchIndex}-awayScore`);
