@@ -680,6 +680,66 @@
 		}
 	}
 
+	function clearExpiredCache() {
+		const now = new Date().getTime();
+		const lastCleared = localStorage.getItem("dfClearedCacheTimestamp");
+		if (lastCleared && now - lastCleared < 24 * 60 * 60 * 1000) {
+			console.debug("Table cache was cleared within last 24 hours");
+			return;
+		}
+
+		let dfTableInfo = JSON.parse(localStorage.getItem("dfTableInfo")) || {};
+		Object.keys(dfTableInfo).forEach(tableId => {
+			const cachedData = dfTableInfo[tableId];
+			if (cachedData && now - cachedData.timestamp > 7 * 24 * 60 * 60 * 1000) {
+				delete dfTableInfo[tableId];
+				console.debug(`Removed expired cache for table ${tableId}`);
+			}
+		});
+
+		localStorage.setItem("dfTableInfo", JSON.stringify(dfTableInfo));
+		localStorage.setItem("dfClearedCacheTimestamp", now);
+	}
+
+	clearExpiredCache();
+
+	async function getTableInfo(tableId) {
+		let dfTableInfo = JSON.parse(localStorage.getItem("dfTableInfo")) || {};
+		if (dfTableInfo[tableId]) {
+			console.debug(`Using cached data for table ${tableId}`);
+			const cachedObject = dfTableInfo[tableId];
+			return cachedObject.data;
+		}
+
+		const params = { id: tableId };
+		try {
+			const response = await dojo.xhrGet({
+				url: "https://boardgamearena.com/table/table/tableinfos.html",
+				content: params,
+				handleAs: "json",
+				headers: { "X-Request-Token": bgaConfig.requestToken },
+				sync: true
+			});
+			if (response && response.data) {
+				const data = response.data;
+				const timestamp = new Date().getTime();
+
+				dfTableInfo[tableId] = {
+					timestamp: timestamp,
+					data: data
+				};
+				localStorage.setItem("dfTableInfo", JSON.stringify(dfTableInfo));
+				console.debug(`Loaded data for table ${tableId} and stored in localStorage`);
+
+				return data;
+			} else {
+				throw new Error("Failed to fetch table info");
+			}
+		} catch (err) {
+			throw err;
+		}
+	}
+
 	/**
 	 * Return games for two players in a given day
 	 *
@@ -700,17 +760,17 @@
 				params.end_date = day + 86400 * 2; // include games played after midnight UTC
 			}
 
-			const response = dojo.xhrGet({
+			const response = await dojo.xhrGet({
 				url: "https://boardgamearena.com/gamestats/gamestats/getGames.html",
 				content: params,
 				handleAs: "json",
 				headers: { "X-Request-Token": bgaConfig.requestToken },
 				sync: true
 			});
-			for (const table of response.results[0].data.tables) {
+
+			for (const table of response.data.tables) {
 				const tableUrl = `https://boardgamearena.com/table?table=${table.table_id}`;
 				const tablePlayers = table.players.split(",");
-				// remove mutually abandoned tables
 				if (table.scores === null) {
 					continue;
 				}
@@ -726,36 +786,31 @@
 					tableFlags += " 🏟️ ";
 				}
 
-				const params = {
-					id: table.table_id,
-				};
-				const response = dojo.xhrGet({
-					url: "https://boardgamearena.com/table/table/tableinfos.html",
-					content: params,
-					handleAs: "json",
-					headers: { "X-Request-Token": bgaConfig.requestToken },
-					sync: true
-				});
 				let tableClockViolations = [];
-				for (const penalty of Object.entries(response.results[0].data.result.penalties)) {
-					if (penalty[1].clock == "1") {
-						tableClockViolations.push(penalty[0]);
-					}
-				}
-				if (tableClockViolations.length > 0) {
-					tableFlags += ` ${"⏰".repeat(tableClockViolations.length)} `;
-					if (tableClockViolations.length == 2) {
-						tableRanks[0] = 0;
-						tableRanks[1] = 0;
-					} else {
-						if (tableClockViolations[0] == tablePlayers[0]) {
-							tableRanks[0] = 2;
-							tableRanks[1] = 1;
-						} else {
-							tableRanks[0] = 1;
-							tableRanks[1] = 2;
+				try {
+					const tableInfo = await getTableInfo(table.table_id);
+					for (const penalty of Object.entries(tableInfo.result.penalties)) {
+						if (penalty[1].clock == "1") {
+							tableClockViolations.push(penalty[0]);
 						}
 					}
+					if (tableClockViolations.length > 0) {
+						tableFlags += ` ${"⏰".repeat(tableClockViolations.length)} `;
+						if (tableClockViolations.length == 2) {
+							tableRanks[0] = 0;
+							tableRanks[1] = 0;
+						} else {
+							if (tableClockViolations[0] == tablePlayers[0]) {
+								tableRanks[0] = 2;
+								tableRanks[1] = 1;
+							} else {
+								tableRanks[0] = 1;
+								tableRanks[1] = 2;
+							}
+						}
+					}
+				} catch (error) {
+					console.error(`Error fetching table info for table ${table.table_id}:`, error);
 				}
 
 				tables.push({
@@ -770,8 +825,9 @@
 					flags: tableFlags,
 					clockViolations: tableClockViolations
 				});
+				tables.sort((a, b) => a.timestamp - b.timestamp);
 			}
-			tables.sort((a, b) => a.timestamp - b.timestamp);
+
 			// remove tables played earlier on match day
 			if (hidePremature && day && tables.length > 0) {
 				const lastTimestamp = tables[tables.length - 1].timestamp;
@@ -801,8 +857,7 @@
 			console.debug(`Got ${tables.length} tables`);
 
 			return { player0Id, player1Id, playersUrl, tables };
-		}
-		catch (error) {
+		} catch (error) {
 			console.error(`Could not get games for ${player0} – ${player1}: ${error}`);
 			return {
 				playersUrl: "#",
