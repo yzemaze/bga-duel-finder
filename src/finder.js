@@ -909,7 +909,7 @@
 
 			// Check for Comments
 			if (duelTxt.startsWith("#")) {
-				let vals = duelTxt.substring(1).split(",");
+				let vals = duelTxt.substring(1).split(/,| vs | - | – /);
 				if (vals.length == 1) {
 					const comment = document.createElement("h2");
 					comment.classList = "dfComment";
