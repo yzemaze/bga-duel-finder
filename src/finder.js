@@ -388,6 +388,7 @@
 			grid-template-columns: max-content 1fr max-content;
 			grid-template-rows: none;
 			min-height: 3em;
+			min-width: 20em;
 		}
 		.horizontal #dfHead {
 			padding: 0.5em 0.2em;
