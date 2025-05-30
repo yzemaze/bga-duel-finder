@@ -33,6 +33,8 @@ javascript:(function()%7B%2F**%0A%20*%20BGA%20Duel%20Finder%202%0A%20*%0A%20*%20
 6. Click green `➡` button.
 7. Drag (header only) and resize the box to fit your needs. Zoom in/out by mouse wheel works as well.
 8. Doubleclick the header to toggle the layout.
+9. Shift+doubleclick: hide main window, display title bar only (again to revert)
+10. Control+shift+doubleclick: main window will become transparent (again to revert)
 
 ### 👩‍💻 Matches & duels syntax
 ` - ` (minus sign), ` – ` (en dash) or ` vs ` [with leading and trailing space!] are valid separators between usernames:

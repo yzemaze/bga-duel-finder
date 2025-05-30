@@ -262,6 +262,7 @@
 			color: #fff;
 			padding: 0.2em 0.4em;
 			user-select: none;
+			white-space: nowrap;
 		}
 		#dfBody {
 			display: grid;
@@ -418,6 +419,18 @@
 		.horizontal .fixtureScore, .horizontal .duelScore {
 			grid-column-start: 2;
 		}
+		#dfBox.min {
+			height: min-content !important;
+			width: min-content !important;
+			min-height: min-content;
+			min-width: min-content;
+		}
+		#dfBox.min #dfBody, #dfBox.transparent #dfBody {
+			display: none;
+		}
+		#dfBox.transparent {
+			background: transparent;
+		}
 	 `;
 	document.head.appendChild(style);
 
@@ -540,7 +553,15 @@
 		document.body.appendChild(dfBox);
 		applyBoxLayout(dfBox);
 
-		dfHead.ondblclick = function() { applyBoxLayout(dfBox, "toggle") };
+		dfHead.addEventListener("dblclick", (event) => {
+			if (event.ctrlKey && event.shiftKey) {
+				dfBox.classList.toggle("transparent");
+			} else if (event.shiftKey) {
+				dfBox.classList.toggle("min");
+			} else {
+				applyBoxLayout(dfBox, "toggle");
+			}
+		});
 
 		function zoom(event) {
 			event.preventDefault();
