@@ -12,7 +12,7 @@
 	const REQUEST_INTERVAL = 250; // ms
 	const CACHE_DURATION = 7*24*60*60*1000; // 7d in ms
 	const DATA_CACHE_DURATION = 2*60*60*1000; // 2h in ms
-	const ENDGAME_THRESHOLD = 70;
+	const ENDGAME_THRESHOLD = 70; // %
 	let flags = new Map([
 		["Afghanistan", "🇦🇫"],
 		["Albania", "🇦🇱"],
@@ -234,7 +234,7 @@
 			min-width: fit-content;
 			height: max-content;
 			min-height: 110px;
-			font-size: 1em;
+			font-size: 12px;
 			background: #f0f0f0;
 			box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.3);
 			border-radius: 0.5em;
@@ -301,7 +301,7 @@
 			margin: 0;
 			height: fit-content;
 			width: fit-content;
-			padding: 0.4em 0.8em;
+			padding: 0.2em 0.4em;
 		}
 		#dfFindButton, #dfCloseButton {
 			display: block;
@@ -409,9 +409,6 @@
 		.horizontal #dfButtonDiv {
 			grid-template-columns: 1fr;
 			grid-template-rows: repeat(3, max-content);
-		}
-		#dfBox.horizontal .duelsView .bgabutton {
-			padding: 0.2em 0.4em;
 		}
 		#dfBox.horizontal h2.matchHeader {
 			margin: 0;
