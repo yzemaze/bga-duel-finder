@@ -1166,7 +1166,7 @@
 		dfData.set("dfConfig", document.getElementById("dfConfig").value);
 		dfData.set("lastSaved", Date.now());
 		localStorage.setItem("dfData", JSON.stringify([...dfData]));
-		console.debug("Data saved to localStorage");
+		console.debug("dfData saved to localStorage");
 	}
 
 	function retrieveDataFromLocalStorage() {
@@ -1176,15 +1176,15 @@
 			document.getElementById("hidePremature").checked = eval(dfData.get("hidePremature"));
 			const duelData = dfData.get("dfConfig") ?? "";
 			document.getElementById("dfConfig").value = duelData;
-			console.debug("Data retrieved from localStorage");
+			console.debug("dfData retrieved from localStorage");
 			const lastSaved = dfData.get("lastSaved");
 			if (Date.now() - lastSaved < DATA_CACHE_DURATION) {
-				console.debug("Reloading retrieved data")
+				console.debug("Reloading retrieved dfData")
 				document.getElementById("dfFindButton").click();
 				applyBoxLayout();
 			}
 		} else {
-			console.debug("Could not retrieve data from localStorage");
+			console.debug("Could not retrieve dfData from localStorage");
 		}
 	}
 
@@ -1204,7 +1204,7 @@
 		});
 		dfBoxAttrs.set("savedOrientation", orientation);
 		localStorage.setItem("dfBoxAttrs", JSON.stringify([...dfBoxAttrs]));
-		console.debug("Layout saved to localStorage");
+		console.debug("dfLayout saved to localStorage");
 	}
 
 	function applyBoxLayout(box, mode) {
