@@ -238,7 +238,7 @@
 			background: #f0f0f0;
 			box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.3);
 			border-radius: 0.5em;
-			z-index: 10000;
+			z-index: 1000;
 			resize: both;
 			overflow: hidden;
 		}
@@ -561,15 +561,17 @@
 		});
 
 		function zoom(event) {
-			event.preventDefault();
-			let scale = 1;
-			if (dfBox.style.transform) {
-				scale = parseFloat(dfBox.style.transform.match(/scale\(([^)]+)\)/)[1]);
-			}
-			scale += event.deltaY * -0.001 / 9;
-			scale = Math.min(Math.max(0.5, scale), 2);
-			dfBox.style.transform = `scale(${scale})`;
-			saveBoxLayoutToLocalStorage(dfBox);
+      if (event.ctrlKey) {
+			  event.preventDefault();
+        let scale = 1;
+        if (dfBox.style.transform) {
+          scale = parseFloat(dfBox.style.transform.match(/scale\(([^)]+)\)/)[1]);
+        }
+        scale += event.deltaY * -0.001 / 9;
+        scale = Math.min(Math.max(0.5, scale), 2);
+        dfBox.style.transform = `scale(${scale})`;
+        saveBoxLayoutToLocalStorage(dfBox);
+      }
 		}
 		dfBox.onwheel = zoom;
 
