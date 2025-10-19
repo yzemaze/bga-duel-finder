@@ -991,7 +991,10 @@
 				}
 			} else {
 				// Get players
-				let players = duelTxt.split(/\d+\.\s+| vs | - | – /);
+				// carcassonne.gg ^(\d+\.?\s)?([\w_ -]+)\s+(-|–|vs)\s+([\w_ -]+)\s?(\d{3}\t)?.*$
+				// let players = duelTxt.split(/\d+\.\s+| vs | - | – |\d{3}(\t[^\w].*$)?/);
+				let duelTxtMatch = duelTxt.match(/^(\d+\.?\s)?([\w_ -]+)\s+(-|–|vs)\s+([\w_ -]+)\s?(\d{3}\t)?.*$/);
+				let players = [duelTxtMatch[2], duelTxtMatch[4]];
 				players = players.filter(e => e);
 				if (players.length !== 2) {
 					console.error(`Could not get players for "${duelTxt}"`);
