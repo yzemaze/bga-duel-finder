@@ -425,6 +425,20 @@
 		#dfBox.min #dfBody, #dfBox.transparent #dfBody {
 			display: none;
 		}
+		#dfMessages {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background-color: rgba(255, 0, 0, 0.8);
+			color: white;
+			padding: 10px;
+			border-radius: 10px;
+			z-index: 1001;
+			display: none;
+			opacity: 0;
+			transition: opacity 0.5s ease-in-out;
+		}
 		#dfBox.transparent {
 			background: transparent;
 		}
@@ -537,12 +551,14 @@
 		toggleDatesButton.id = "dfToggleDatesButton";
 		toggleDatesButton.classList = "bgabutton bgabutton_blue";
 		toggleDatesButton.innerText = "📅";
+		const dfMessages = document.createElement("div");
+		dfMessages.id = "dfMessages";		
 		dfButtonDiv.appendChild(closeButton);
 		dfButtonDiv.appendChild(findButton);
 		dfButtonDiv.appendChild(backButton);
 		dfButtonDiv.appendChild(reloadButton);
 		dfButtonDiv.appendChild(toggleDatesButton);
-
+		dfButtonDiv.appendChild(dfMessages);
 		dfBody.appendChild(dfInputForm);
 		dfBody.appendChild(dfGamesList);
 		dfBody.appendChild(dfButtonDiv);
@@ -645,15 +661,37 @@
 			document.body.removeChild(dfBox);
 		}
 
-		reloadButton.onclick = async function () {
-			const gameId = 1; // Carcassonne
-			const date = new Date(datePicker.value);
-			const unixTimestamp = Math.floor(date.getTime() / 1000);
-			const duelsText = textArea.value;
-			dfGamesList.innerHTML = "";
-			await getAllDuels(duelsText, unixTimestamp, gameId);
-		}
-
+				reloadButton.onclick = async function () {
+					const gameId = 1; // Carcassonne
+					const configuredDate = new Date(datePicker.value);
+					const today = new Date();
+					const dfMessages = document.getElementById("dfMessages");
+					dfMessages.innerText = "";
+		
+					// Normalize dates to compare only year, month, and day
+					configuredDate.setHours(0, 0, 0, 0);
+					today.setHours(0, 0, 0, 0);
+		
+					if (configuredDate.getTime() !== today.getTime()) {
+						dfMessages.innerText = "Configured date is not today! Reloading …";
+						dfMessages.style.display = "block";
+						setTimeout(() => {
+							dfMessages.style.opacity = "1";
+						}, 10); // small delay to allow display to be set to block
+		
+						setTimeout(() => {
+							dfMessages.style.opacity = "0";
+							setTimeout(() => {
+								dfMessages.style.display = "none";
+							}, 500); // after fade out transition
+						}, 2000); // show for 2 seconds
+					}
+		
+					const unixTimestamp = Math.floor(configuredDate.getTime() / 1000);
+					const duelsText = textArea.value;
+					dfGamesList.innerHTML = "";
+					await getAllDuels(duelsText, unixTimestamp, gameId);
+				}
 		toggleDatesButton.onclick = function () {
 			document.getElementById("dfGamesList").classList.toggle("noDates");
 		}
