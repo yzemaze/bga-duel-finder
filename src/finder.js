@@ -241,6 +241,7 @@
 			z-index: 1000;
 			resize: both;
 			overflow: hidden;
+			transform-origin: top left;
 		}
 		#dfBox .duel a {
 			color: rgb(72, 113, 182);
