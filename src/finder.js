@@ -235,7 +235,7 @@
 			height: max-content;
 			min-height: 110px;
 			font-size: 12px;
-			background: #f0f0f0;
+			background-color: var(--game-palette-bga-gray-244, #f0f0f0);
 			box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.3);
 			border-radius: 0.5em;
 			z-index: 1000;
@@ -303,6 +303,7 @@
 			height: fit-content;
 			width: fit-content;
 			padding: 0.2em 0.4em;
+			border: none;
 		}
 		#dfFindButton, #dfCloseButton {
 			display: block;
@@ -442,6 +443,17 @@
 		}
 		#dfBox.transparent {
 			background: transparent;
+		}
+		html.dark {
+			#dfBox {
+				background-color: var(--game-palette-bga-gray-244, #3c4054);
+				.duel a {
+					color: rgb(198, 220, 255);
+				}
+			}
+			#dfHead {
+				background-color: #1f2937;
+			}
 		}
 	 `;
 	document.head.appendChild(style);
