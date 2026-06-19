@@ -217,245 +217,159 @@
 
 	let style = document.createElement("style");
 	style.innerHTML = `
-		.drag-handle {
-			cursor: pointer;
-		}
-		.dragging{
-			cursor: move !important;
-		}
-		#dfBox {
-			box-sizing: border-box;
-			display: grid;
-			grid-template-rows: max-content 1fr;
-			position: absolute;
-			left: 0;
-			bottom: 0;
-			width: max-content;
-			min-width: fit-content;
-			height: max-content;
-			min-height: 110px;
-			font-size: 12px;
-			background-color: var(--game-palette-bga-gray-244, #f0f0f0);
-			box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.3);
-			border-radius: 0.5em;
-			z-index: 1000;
-			resize: both;
-			overflow: hidden;
-			transform-origin: top left;
-		}
-		#dfBox .duel a {
-			color: rgb(72, 113, 182);
-			text-decoration: none;
-		}
-		#dfBox h2 {
-			font-size: 1.1em;
-			font-weight: normal;
-			margin: 0;
-		}
-		#dfBox .bga-link {
-			font-weight: normal;
-		}
-		#dfBox h2.dfComment {
-			font-weight: bold;
-		}
-		#dfHead {
-			background: #4871b6;
-			color: #fff;
-			padding: 0.2em 0.4em;
-			user-select: none;
-			white-space: nowrap;
-		}
-		#dfBody {
-			display: grid;
-			grid-template-rows: 1fr max-content;
-			overflow: auto;
-			grid-gap: 0.5em;
-			padding: 0.2em 0.4em 0.4em 0.4em;
-		}
-		#dfInputForm {
-			display: grid;
-			grid-template-rows: repeat(3, max-content) 1fr;
-			grid-template-columns: max-content 1fr;
-			grid-gap: 0 0.5em;
-		}
-		#dfInputForm input {
-			width: fit-content;
-			border-radius: 0.3em;
-		}
-		.duelsView #dfInputForm {
-			display: none;
-		}
-		#dfConfig, #dfConfigLabel {
-			grid-column: span 2;
-		}
-		#dfConfig {
-			width: 100%;
-			border-radius: 0.3em;
-		}
-		#dfButtonDiv {
-			display: grid;
-			grid-template-columns: repeat(3, max-content);
-			grid-gap: 0.5em;
-			font-size: 1em;
-		}
-		#dfBox .bgabutton {
-			margin: 0;
-			height: fit-content;
-			width: fit-content;
-			padding: 0.2em 0.4em;
-			border: none;
-		}
-		#dfFindButton, #dfCloseButton {
-			display: block;
-		}
-		#dfBackButton, #dfReloadButton, #dfToggleDatesButton {
-			display: none;
-		}
-		.duelsView #dfBackButton, .duelsView #dfReloadButton, .duelsView #dfToggleDatesButton {
-			display: block;
-		}
-		.duelsView #dfFindButton, .duelsView #dfCloseButton, .horizontal #dfToggleDatesButton {
-			display: none;
-		}
-		#dfGamesList {
-			display: none;
-			overflow: auto;
-			grid-auto-rows: max-content;
-			grid-gap: 0.1em;
-			padding-right: 0.4em;
-		}
-		.duelsView #dfGamesList {
-			display: grid;
-		}
-		.matchHeader, .duelHeader {
-			display: grid;
-			grid-template-columns: max-content 1fr;
-			grid-template-rows: 1fr;
-			grid-gap: 0.4em;
-		}
-		#dfBox .matchHeader {
-			margin: 0.3em 0 0.2em 0;
-		}
-		#dfBox .matchHeader:first-of-type {
-			margin-top: 0;
-		}
-		.fixtureScore, .duelScore {
-			grid-column-start: 3;
-		}
-		.duel {
-			display: grid;
-			grid-template-rows: max-content 1fr;
-		}
-		.break {
-			display: none;
-		}
-		.duel ~ .break {
-			display: grid;
-			width: 100%;
-		}
-		#dfGamesList.noDates .resultDate {
-			display: none;
-		}
-		#dfGamesList.noDates ul.duelGamesList > li {
-			display: inline;
-		}
-		#dfGamesList.noDates ul.duelGamesList > li:not(:last-child)::after {
-			content: " • ";
-			color: #888;
-		}
-		li.result {
-			display: grid;
-			grid-template-columns: repeat(3, max-content);
-			grid-gap: 0.3em;
-			align-items: end;
-		}
-		li.result .resultDate {
-			font-size: 0.9em;
-		}
-		li.result .bga-link {
-			display: grid;
-			grid-template-columns: 1.8em .4em 1.8em;
-			justify-items: end;
-		}
-		.noDates li.result .bga-link {
-			display: inline;
-		}
-		span.win {
-			font-weight: bold;
-		}
-		span.progress {
-			grid-column: 3 span;
-		}
-		#dfBox.horizontal {
-			grid-auto-flow: column;
-			grid-template-columns: max-content 1fr max-content;
-			grid-template-rows: none;
-			min-height: 3em;
-			min-width: 20em;
-		}
-		.horizontal #dfHead {
-			padding: 0.5em 0.2em;
-			writing-mode: tb;
-		}
-		.horizontal #dfBody {
-			grid-template-rows: none;
-			grid-auto-flow: column;
-			grid-template-columns: 1fr auto;
-			padding: 0.5em;
-		}
-		.horizontal #dfGamesList {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 0.15em 1em;
-		}
-		.horizontal #dfButtonDiv {
-			grid-template-columns: 1fr;
-			grid-template-rows: repeat(3, max-content);
-		}
-		#dfBox.horizontal h2.matchHeader {
-			margin: 0;
-		}
-		.horizontal .fixtureScore, .horizontal .duelScore {
-			grid-column-start: 2;
-		}
-		#dfBox.min {
-			height: min-content !important;
-			width: min-content !important;
-			min-height: min-content;
-			min-width: min-content;
-		}
-		#dfBox.min #dfBody, #dfBox.transparent #dfBody {
-			display: none;
-		}
-		#dfMessages {
-			position: fixed;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			background-color: rgba(255, 0, 0, 0.8);
-			color: white;
-			padding: 10px;
-			border-radius: 10px;
-			z-index: 1001;
-			display: none;
-			opacity: 0;
-			transition: opacity 0.5s ease-in-out;
-		}
-		#dfBox.transparent {
-			background: transparent;
-		}
-		html.dark {
+			.drag-handle { cursor: pointer; }
+			.dragging { cursor: move !important; }
+
 			#dfBox {
-				background-color: var(--game-palette-bga-gray-244, #3c4054);
-				.duel a {
-					color: rgb(198, 220, 255);
-				}
+					box-sizing: border-box;
+					display: grid;
+					grid-template-rows: auto 1fr;
+					position: absolute;
+					left: 0;
+					bottom: 0;
+					width: max-content;
+					min-width: fit-content;
+					min-height: 110px;
+					font-size: 12px;
+					background-color: var(--game-palette-bga-gray-244, #f0f0f0);
+					box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.3);
+					border-radius: 0.5em;
+					z-index: 1000;
+					resize: both;
+					overflow: hidden;
+					transform-origin: top left;
+
+					.duel a { color: rgb(72, 113, 182); text-decoration: none; }
+					.bga-link { font-weight: normal; }
+					h2 { 
+							font-size: 1.1em; 
+							font-weight: normal; 
+							margin: 0; 
+							&.dfComment { font-weight: bold; }
+					}
+					.bgabutton {
+							margin: 0;
+							height: fit-content;
+							width: fit-content;
+							padding: 0.2em 0.4em;
+							border: none;
+					}
 			}
+
 			#dfHead {
-				background-color: #1f2937;
+					background: #4871b6;
+					color: #fff;
+					padding: 0.2em 0.4em;
+					user-select: none;
+					white-space: nowrap;
 			}
-		}
-	 `;
+			#dfBody {
+					display: grid;
+					grid-template-rows: 1fr auto;
+					overflow: auto;
+					gap: 0.5em;
+					padding: 0.2em 0.4em 0.4em 0.4em;
+			}
+
+			#dfInputForm {
+					display: grid;
+					grid-template-rows: repeat(3, auto) 1fr;
+					grid-template-columns: auto 1fr;
+					gap: 0 0.5em;
+					
+					input, #dfConfig { border-radius: 0.3em; width: fit-content; }
+					#dfConfig { grid-column: span 2; width: 100%; }
+					#dfConfigLabel { grid-column: span 2; }
+			}
+
+			#dfButtonDiv {
+					display: grid;
+					grid-template-columns: repeat(3, auto);
+					gap: 0.5em;
+			}
+
+			#dfGamesList, #dfBackButton, #dfReloadButton, #dfToggleDatesButton { display: none; }
+			#dfFindButton, #dfCloseButton { display: block; }
+
+			.duelsView {
+					#dfInputForm, #dfFindButton, #dfCloseButton { display: none; }
+					#dfGamesList { display: grid; }
+					#dfBackButton, #dfReloadButton, #dfToggleDatesButton { display: block; }
+			}
+
+			#dfGamesList {
+					overflow: auto;
+					grid-auto-rows: auto;
+					gap: 0.1em;
+					padding-right: 0.4em;
+			}
+			.matchHeader, .duelHeader, .duel, li.result { display: grid; gap: 0.4em; }
+			.matchHeader, .duelHeader { grid-template-columns: auto 1fr; }
+			#dfBox .matchHeader { margin: 0.3em 0 0.2em 0; &:first-of-type { margin-top: 0; } }
+			
+			.fixtureScore, .duelScore { grid-column-start: 3; }
+			.duel { grid-template-rows: auto 1fr; }
+			.break { display: none; width: 100%; }
+			.duel ~ .break { display: grid; }
+
+			li.result {
+					grid-template-columns: repeat(3, auto);
+					align-items: end;
+					.resultDate { font-size: 0.9em; }
+					.bga-link { display: grid; grid-template-columns: 1.8em .4em 1.8em; justify-items: end; }
+			}
+
+			.noDates {
+					.resultDate { display: none; }
+					ul.duelGamesList > li { 
+							display: inline; 
+							&:not(:last-child)::after { content: " • "; color: #888; }
+					}
+					li.result .bga-link { display: inline; }
+			}
+
+			#dfBox.horizontal {
+					grid-auto-flow: column;
+					grid-template-columns: auto 1fr auto;
+					grid-template-rows: none;
+					min-height: 3em;
+					min-width: 20em;
+
+					#dfHead { padding: 0.5em 0.2em; writing-mode: vertical-lr; }
+					#dfBody { grid-template-rows: none; grid-auto-flow: column; grid-template-columns: 1fr auto; padding: 0.5em; }
+					#dfGamesList { display: flex; flex-wrap: wrap; gap: 0.15em 1em; }
+					#dfButtonDiv { grid-template-columns: 1fr; grid-template-rows: repeat(3, auto); }
+					#dfToggleDatesButton { display: none; }
+					h2.matchHeader { margin: 0; }
+					.fixtureScore, .duelScore { grid-column-start: 2; }
+			}
+
+			#dfBox.min {
+					height: auto !important; width: auto !important;
+					min-height: auto; min-width: auto;
+					#dfBody { display: none; }
+			}
+			#dfBox.transparent { background: transparent; }
+
+			#dfMessages {
+					position: fixed; top: 50%; left: 50%;
+					transform: translate(-50%, -50%);
+					background: rgba(255, 0, 0, 0.8);
+					color: white;
+					padding: 10px;
+					border-radius: 10px;
+					z-index: 1001;
+					display: none;
+					opacity: 0;
+					transition: opacity 0.5s ease-in-out;
+			}
+
+			html.dark #dfBox {
+					background-color: var(--game-palette-bga-gray-244, #3c4054);
+					#dfHead { background-color: #1f2937; }
+					.duel a { color: rgb(198, 220, 255); }
+			}
+	`;
 	document.head.appendChild(style);
 
 	createUi();
