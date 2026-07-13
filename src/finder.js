@@ -672,42 +672,42 @@
 
 		closeButton.onclick = function () {
 			document.body.removeChild(dfBox);
-		}
+		};
 
-				reloadButton.onclick = async function () {
-					const gameId = 1; // Carcassonne
-					const configuredDate = new Date(datePicker.value);
-					const today = new Date();
-					const dfMessages = document.getElementById("dfMessages");
-					dfMessages.innerText = "";
-		
-					// Normalize dates to compare only year, month, and day
-					configuredDate.setHours(0, 0, 0, 0);
-					today.setHours(0, 0, 0, 0);
-		
-					if (configuredDate.getTime() !== today.getTime()) {
-						dfMessages.innerText = "Configured date is not today! Reloading …";
-						dfMessages.style.display = "block";
-						setTimeout(() => {
-							dfMessages.style.opacity = "1";
-						}, 10); // small delay to allow display to be set to block
-		
-						setTimeout(() => {
-							dfMessages.style.opacity = "0";
-							setTimeout(() => {
-								dfMessages.style.display = "none";
-							}, 500); // after fade out transition
-						}, 2000); // show for 2 seconds
-					}
-		
-					const unixTimestamp = Math.floor(configuredDate.getTime() / 1000);
-					const duelsText = textArea.value;
-					dfGamesList.innerHTML = "";
-					await getAllDuels(duelsText, unixTimestamp, gameId);
-				}
+		reloadButton.onclick = async function () {
+			const gameId = 1; // Carcassonne
+			const configuredDate = new Date(datePicker.value);
+			const today = new Date();
+			const dfMessages = document.getElementById("dfMessages");
+			dfMessages.innerText = "";
+
+			// Normalize dates to compare only year, month, and day
+			configuredDate.setHours(0, 0, 0, 0);
+			today.setHours(0, 0, 0, 0);
+
+			if (configuredDate.getTime() !== today.getTime()) {
+				dfMessages.innerText = "Configured date is not today! Reloading …";
+				dfMessages.style.display = "block";
+				setTimeout(() => {
+					dfMessages.style.opacity = "1";
+				}, 10); // small delay to allow display to be set to block
+
+				setTimeout(() => {
+					dfMessages.style.opacity = "0";
+					setTimeout(() => {
+						dfMessages.style.display = "none";
+					}, 500); // after fade out transition
+				}, 2000); // show for 2 seconds
+			}
+
+			const unixTimestamp = Math.floor(configuredDate.getTime() / 1000);
+			const duelsText = textArea.value;
+			dfGamesList.innerHTML = "";
+			await getAllDuels(duelsText, unixTimestamp, gameId);
+		};
 		toggleDatesButton.onclick = function () {
 			document.getElementById("dfGamesList").classList.toggle("noDates");
-		}
+		};
 
 		retrieveDataFromLocalStorage();
 	}
@@ -968,7 +968,6 @@
 		const hidePremature = document.getElementById("hidePremature").checked;
 		const dfGamesList = document.getElementById("dfGamesList");
 		const duelsTxt = allDuelsTxt.split("\n");
-		const vsRegex = new RegExp(" vs ", "i");
 		let matchIndex = -1;
 		let nMatches = 5;
 		let nGames = 3;
@@ -1044,7 +1043,7 @@
 				// Get players
 				// carcassonne.gg ^(\d+\.?\s)?([\w_ -]+)\s+(-|–|vs)\s+([\w_ -]+)\s?(\d{3}\t)?.*$
 				// let players = duelTxt.split(/\d+\.\s+| vs | - | – |\d{3}(\t[^\w].*$)?/);
-				let duelTxtMatch = duelTxt.match(/^(\d+\.?\s)?([\w_ -]+)\s+(-|–|vs)\s+([\w_ -]+)\s?(\d{3}\t)?.*$/);
+				let duelTxtMatch = duelTxt.match(/^(\d+\.?\s)?([\w -]+)\s+(-|–|vs)\s+([\w -]+)\s?(\d{3}\t)?.*$/);
 				let players = [duelTxtMatch[2], duelTxtMatch[4]];
 				players = players.filter(e => e);
 				if (players.length !== 2) {
@@ -1067,7 +1066,7 @@
 					const gameLink = document.createElement("a");
 					const dateSpan = document.createElement("span");
 					dateSpan.classList.add("resultDate");
-					let dateText = ""
+					let dateText = "";
 					if (isToday(day)) {
 						dateText = `${game.startDate.substring(11)}–${game.endDate.substring(11)}`;
 					} else if (day || (game.startDate.substring(0,10) == game.endDate.substring(0,10))) {
@@ -1235,7 +1234,7 @@
 			console.debug("dfData retrieved from localStorage");
 			const lastSaved = dfData.get("lastSaved");
 			if (Date.now() - lastSaved < DATA_CACHE_DURATION) {
-				console.debug("Reloading retrieved dfData")
+				console.debug("Reloading retrieved dfData");
 				document.getElementById("dfFindButton").click();
 				applyBoxLayout();
 			}
