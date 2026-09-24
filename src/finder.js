@@ -737,7 +737,7 @@
 			});
 
 			for (const currentUser of response.results[0].items) {
-				if (currentUser.q.toLowerCase() === name.toLowerCase()) {
+				if (currentUser.q.toLowerCase().trim() === name.toLowerCase()) {
 					console.debug(`Found id ${currentUser.id} for ${name}`);
 					localStorage.setItem(cacheKey, JSON.stringify({ id: currentUser.id, timestamp: currentTime }));
 					return currentUser.id;
