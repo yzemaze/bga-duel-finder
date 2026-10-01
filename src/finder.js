@@ -1227,13 +1227,13 @@
 	function retrieveDataFromLocalStorage() {
 		if (localStorage.dfData) {
 			const dfData = new Map(JSON.parse(localStorage.dfData));
-			document.getElementById("datePicker").value = dfData.get("datePicker");
 			document.getElementById("hidePremature").checked = eval(dfData.get("hidePremature"));
 			const duelData = dfData.get("dfConfig") ?? "";
 			document.getElementById("dfConfig").value = duelData;
 			console.debug("dfData retrieved from localStorage");
 			const lastSaved = dfData.get("lastSaved");
 			if (Date.now() - lastSaved < DATA_CACHE_DURATION) {
+				document.getElementById("datePicker").value = dfData.get("datePicker");
 				console.debug("Reloading retrieved dfData");
 				document.getElementById("dfFindButton").click();
 				applyBoxLayout();
