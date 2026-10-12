@@ -14,6 +14,7 @@
 	const DATA_CACHE_DURATION = 2*60*60*1000; // 2h in ms
 	const ENDGAME_THRESHOLD = 70; // %
 	let excludedTables = new Set();
+	let clockWinners = new Map();
 	let flags = new Map([
 		["Afghanistan", "🇦🇫"],
 		["Albania", "🇦🇱"],
@@ -468,7 +469,7 @@
 	createUi();
 
 	/**
-	 * Check if a date is equal to today or yesterday
+	 * Check if a date is equal to today
 	 */
 	function isToday(unixTimestamp) {
 		const today = new Date();
@@ -478,12 +479,14 @@
 		);
 	}
 
-	function isYesterday(unixTimestamp) {
-		const yesterday = new Date(Date.now - 24*60*60*1000);
-		const date = new Date(unixTimestamp * 1000);
-		return (
-			date.setHours(0,0,0,0) == yesterday.setHours(0,0,0,0)
-		);
+	/**
+	 * Check if games of a day may still be running.
+	 * Days are UTC, so allow for local dates ahead of UTC and
+	 * the same span past midnight as for finished games.
+	 */
+	function mayBeRunning(unixTimestamp) {
+		const now = Date.now() / 1000;
+		return now >= unixTimestamp - 86400 && now < unixTimestamp + 86400 * 2;
 	}
 
 	/**
@@ -600,7 +603,7 @@
 			const result = getExclusionTarget(event);
 			if (result) {
 				event.preventDefault();
-				toggleExclusion(result);
+				toggleResult(result);
 			}
 		});
 
@@ -921,7 +924,7 @@
 				playersUrl += `&start_date=${day}&end_date=${day + 86400}`;
 			}
 
-			if (!day || isToday(day) || isYesterday(day)) {
+			if (!day || mayBeRunning(day)) {
 				const table = await getGameInProgress(player0Id, player1Id);
 				if (table) {
 					tables.push({
@@ -1086,6 +1089,8 @@
 					dateSpan.innerText = dateText;
 					result.appendChild(dateSpan);
 					gameLink.classList = "bga-link";
+					gameLink.href = game.url;
+					result.appendChild(gameLink);
 					if (game.progress) {
 						const progressSpan = document.createElement("span");
 						progressSpan.classList.add("progress");
@@ -1094,22 +1099,21 @@
 						gameLink.appendChild(progressSpan);
 					} else {
 						const homeScore = document.createElement("span");
+						homeScore.classList.add("homeScore");
 						const awayScore = document.createElement("span");
+						awayScore.classList.add("awayScore");
 						homeScore.innerText = game.score0;
 						awayScore.innerText = game.score1;
-						if (game.rank0 == 1) {
-							homeScore.classList = "win";
-							result.dataset.winner = 0;
-						} else {
-							awayScore.classList = "win";
-							result.dataset.winner = 1;
-						}
 						gameLink.appendChild(homeScore);
 						gameLink.appendChild(document.createTextNode(":"));
 						gameLink.appendChild(awayScore);
+						if (game.clockViolations.length == 2) {
+							result.classList.add("doubleClock");
+							setResultWinner(result, clockWinners.get(String(game.id)));
+						} else {
+							setResultWinner(result, game.rank0 == 1 ? 0 : 1);
+						}
 					}
-					gameLink.href = game.url;
-					result.appendChild(gameLink);
 					if (game.flags) {
 						const flagsSpan = document.createElement("span");
 						flagsSpan.classList.add("flags");
@@ -1204,9 +1208,34 @@
 		});
 	}
 
-	function toggleExclusion(result) {
+	function setResultWinner(result, winner) {
+		if (winner === undefined) {
+			delete result.dataset.winner;
+		} else {
+			result.dataset.winner = winner;
+		}
+		result.querySelector(".homeScore").classList.toggle("win", winner === 0);
+		result.querySelector(".awayScore").classList.toggle("win", winner === 1);
+	}
+
+	/**
+	 * Toggle exclusion of a result.
+	 * BGA doesn't rank games with clock violations by both players correctly
+	 * (first violation should lose), so their winner is cycled instead:
+	 * undecided → home → away
+	 */
+	function toggleResult(result) {
 		const tableId = result.dataset.tableId;
-		if (result.classList.toggle("excluded")) {
+		if (result.classList.contains("doubleClock")) {
+			const states = [undefined, 0, 1];
+			const winner = states[(states.indexOf(clockWinners.get(tableId)) + 1) % states.length];
+			if (winner === undefined) {
+				clockWinners.delete(tableId);
+			} else {
+				clockWinners.set(tableId, winner);
+			}
+			setResultWinner(result, winner);
+		} else if (result.classList.toggle("excluded")) {
 			excludedTables.add(tableId);
 		} else {
 			excludedTables.delete(tableId);
@@ -1262,6 +1291,7 @@
 		dfData.set("datePicker", document.getElementById("datePicker").value);
 		dfData.set("dfConfig", document.getElementById("dfConfig").value);
 		dfData.set("excludedTables", [...excludedTables]);
+		dfData.set("clockWinners", [...clockWinners]);
 		dfData.set("lastSaved", Date.now());
 		localStorage.setItem("dfData", JSON.stringify([...dfData]));
 		console.debug("dfData saved to localStorage");
@@ -1277,6 +1307,7 @@
 			if (Date.now() - lastSaved < DATA_CACHE_DURATION) {
 				document.getElementById("datePicker").value = dfData.get("datePicker");
 				excludedTables = new Set(dfData.get("excludedTables"));
+				clockWinners = new Map(dfData.get("clockWinners"));
 				console.debug("Reloading retrieved dfData");
 				document.getElementById("dfFindButton").click();
 				applyBoxLayout();
