@@ -13,6 +13,7 @@
 	const CACHE_DURATION = 7*24*60*60*1000; // 7d in ms
 	const DATA_CACHE_DURATION = 2*60*60*1000; // 2h in ms
 	const ENDGAME_THRESHOLD = 70; // %
+	let excludedTables = new Set();
 	let flags = new Map([
 		["Afghanistan", "🇦🇫"],
 		["Albania", "🇦🇱"],
@@ -274,7 +275,7 @@
 		}
 		#dfInputForm {
 			display: grid;
-			grid-template-rows: repeat(3, max-content) 1fr;
+			grid-template-rows: repeat(2, max-content) 1fr;
 			grid-template-columns: max-content 1fr;
 			grid-gap: 0 0.5em;
 		}
@@ -382,6 +383,12 @@
 		}
 		span.win {
 			font-weight: bold;
+		}
+		li.result.excluded {
+			opacity: 0.4;
+		}
+		#dfBox li.result.excluded .bga-link {
+			text-decoration: line-through;
 		}
 		span.progress {
 			grid-column: 3 span;
@@ -518,13 +525,6 @@
 		const datePickerLabel = document.createElement("label");
 		datePickerLabel.htmlFor = "datePicker";
 		datePickerLabel.textContent = "Date";
-		const hidePremature = document.createElement("input");
-		hidePremature.type = "checkbox";
-		hidePremature.id = "hidePremature";
-		hidePremature.checked = true;
-		const hidePrematureLabel = document.createElement("label");
-		hidePrematureLabel.htmlFor = "hidePremature";
-		hidePrematureLabel.textContent = "Hide premature games";
 		const textArea = document.createElement("textArea");
 		textArea.id = "dfConfig";
 		const textAreaLabel = document.createElement("label");
@@ -534,8 +534,6 @@
 
 		dfInputForm.appendChild(datePickerLabel);
 		dfInputForm.appendChild(datePicker);
-		dfInputForm.appendChild(hidePrematureLabel);
-		dfInputForm.appendChild(hidePremature);
 		dfInputForm.appendChild(textAreaLabel);
 		dfInputForm.appendChild(textArea);
 
@@ -586,6 +584,23 @@
 				dfBox.classList.toggle("min");
 			} else {
 				applyBoxLayout(dfBox, "toggle");
+			}
+		});
+
+		function getExclusionTarget(event) {
+			return (event.ctrlKey || event.metaKey) && event.shiftKey && event.target.closest("li.result");
+		}
+		dfGamesList.addEventListener("mousedown", (event) => {
+			// keep shift from extending the text selection
+			if (getExclusionTarget(event)) {
+				event.preventDefault();
+			}
+		});
+		dfGamesList.addEventListener("click", (event) => {
+			const result = getExclusionTarget(event);
+			if (result) {
+				event.preventDefault();
+				toggleExclusion(result);
 			}
 		});
 
@@ -702,6 +717,7 @@
 
 			const unixTimestamp = Math.floor(configuredDate.getTime() / 1000);
 			const duelsText = textArea.value;
+			saveDataToLocalStorage();
 			dfGamesList.innerHTML = "";
 			await getAllDuels(duelsText, unixTimestamp, gameId);
 		};
@@ -816,7 +832,7 @@
 	 * Return games for two players in a given day
 	 *
 	 */
-	async function getGames(player0, player1, day, gameId, hidePremature) {
+	async function getGames(player0, player1, day, gameId) {
 		let tables = [];
 		try {
 			const player0Id = getPlayerId(player0);
@@ -900,13 +916,6 @@
 				tables.sort((a, b) => a.timestamp - b.timestamp);
 			}
 
-			// remove tables played earlier on match day
-			if (hidePremature && day && tables.length > 0) {
-				const lastTimestamp = tables[tables.length - 1].timestamp;
-				const thresholdTime = lastTimestamp - ((tables.length + 1) * 60 * 60);
-				tables = tables.filter(table => table.timestamp >= thresholdTime);
-			}
-
 			let playersUrl = `https://boardgamearena.com/gamestats?player=${player0Id}&opponent_id=${player1Id}&game_id=${gameId}&finished=0`;
 			if (day) {
 				playersUrl += `&start_date=${day}&end_date=${day + 86400}`;
@@ -965,13 +974,11 @@
 	}
 
 	async function getAllDuels(allDuelsTxt, day, gameId) {
-		const hidePremature = document.getElementById("hidePremature").checked;
 		const dfGamesList = document.getElementById("dfGamesList");
 		const duelsTxt = allDuelsTxt.split("\n");
 		let matchIndex = -1;
 		let nMatches = 5;
 		let nGames = 3;
-		let teamWins = [0,0];
 
 		for (const [index, duelTxt] of duelsTxt.entries()) {
 			if (!duelTxt) {
@@ -1009,7 +1016,6 @@
 						const matchHeader = document.createElement("h2");
 						matchHeader.classList = "matchHeader";
 						matchIndex = index;
-						teamWins = [0, 0];
 						const matchFixture = document.createElement("span");
 						matchFixture.classList.add("fixture");
 						const home = document.createElement("span");
@@ -1033,8 +1039,8 @@
 						matchScore.appendChild(homeTeamScore);
 						matchScore.appendChild(document.createTextNode(":"));
 						matchScore.appendChild(awayTeamScore);
-						homeTeamScore.innerText = teamWins[0];
-						awayTeamScore.innerText = teamWins[1];
+						homeTeamScore.innerText = 0;
+						awayTeamScore.innerText = 0;
 						matchHeader.appendChild(matchScore);
 						dfGamesList.appendChild(matchHeader);
 					}
@@ -1053,16 +1059,19 @@
 				players = [players[0].trim(), players[1].trim()];
 
 				await sleep(REQUEST_INTERVAL);
-				const gamesData = await getGames(players[0], players[1], day, gameId, hidePremature);
+				const gamesData = await getGames(players[0], players[1], day, gameId);
 				const games = gamesData.tables;
 
 				const duelGamesList = document.createElement("ul");
 				duelGamesList.classList.add("duelGamesList");
 				// Get games info
-				let wins = [0, 0];
 				for (const game of games) {
 					const result = document.createElement("li");
 					result.classList = "result";
+					result.dataset.tableId = game.id;
+					if (excludedTables.has(String(game.id))) {
+						result.classList.add("excluded");
+					}
 					const gameLink = document.createElement("a");
 					const dateSpan = document.createElement("span");
 					dateSpan.classList.add("resultDate");
@@ -1090,10 +1099,10 @@
 						awayScore.innerText = game.score1;
 						if (game.rank0 == 1) {
 							homeScore.classList = "win";
-							wins[0]++;
+							result.dataset.winner = 0;
 						} else {
 							awayScore.classList = "win";
-							wins[1]++;
+							result.dataset.winner = 1;
 						}
 						gameLink.appendChild(homeScore);
 						gameLink.appendChild(document.createTextNode(":"));
@@ -1111,6 +1120,11 @@
 				}
 				const duel = document.createElement("li");
 				duel.classList = "duel";
+				duel.dataset.nGames = nGames;
+				if (matchIndex > -1) {
+					duel.dataset.matchIndex = matchIndex;
+					duel.dataset.nMatches = nMatches;
+				}
 				const duelHeader = document.createElement("h2");
 				duelHeader.classList = "duelHeader";
 
@@ -1129,47 +1143,76 @@
 				const duelScore = document.createElement("span");
 				duelScore.classList.add("duelScore");
 				const homeScore = document.createElement("span");
+				homeScore.classList.add("duelHomeScore");
 				const awayScore = document.createElement("span");
+				awayScore.classList.add("duelAwayScore");
 				duelScore.appendChild(homeScore);
 				duelScore.appendChild(document.createTextNode(":"));
 				duelScore.appendChild(awayScore);
-				homeScore.innerText = wins[0];
-				awayScore.innerText = wins[1];
 
-				if (wins[0] >= nGames/2 && wins[0] > wins[1]) {
-					duelHome.classList.add("win");
-					homeScore.classList.add("win");
-					if (matchIndex > -1) {
-						teamWins[0]++;
-						let homeTeamScoreEl = document.getElementById(`${matchIndex}-homeScore`);
-						homeTeamScoreEl.innerText = teamWins[0];
-						if (teamWins[0] >= nMatches/2) {
-							document.getElementById(`${matchIndex}-home`).classList.add("win");
-							homeTeamScoreEl.classList.add("win");
-						}
-					}
-				} else if (wins[1] >= nGames/2 && wins[1] > wins[0]) {
-					duelAway.classList.add("win");
-					awayScore.classList.add("win");
-					if (matchIndex > -1) {
-						teamWins[1]++;
-						let awayTeamScoreEl = document.getElementById(`${matchIndex}-awayScore`);
-						awayTeamScoreEl.innerText = teamWins[1];
-						if (teamWins[1] >= nMatches/2) {
-							document.getElementById(`${matchIndex}-away`).classList.add("win");
-							awayTeamScoreEl.classList.add("win");
-						}
-					}
-				}
 				duelHeader.appendChild(duelLink);
 				duelHeader.appendChild(duelScore);
 				duel.appendChild(duelHeader);
 				duel.appendChild(duelGamesList);
 				dfGamesList.appendChild(duel);
+				updateScores(duel);
 			}
 		}
 		saveHomePlayersToLocalStorage();
 		return true;
+	}
+
+	/**
+	 * Recalculate duel score and, if part of a match, match score.
+	 * Excluded results are ignored.
+	 */
+	function updateScores(duel) {
+		const wins = [0, 0];
+		for (const result of duel.querySelectorAll(".result:not(.excluded)")) {
+			if (result.dataset.winner) {
+				wins[result.dataset.winner]++;
+			}
+		}
+		delete duel.dataset.winner;
+		["Home", "Away"].forEach((side, i) => {
+			const isWin = wins[i] >= duel.dataset.nGames/2 && wins[i] > wins[1-i];
+			const scoreEl = duel.querySelector(`.duel${side}Score`);
+			scoreEl.innerText = wins[i];
+			scoreEl.classList.toggle("win", isWin);
+			duel.querySelector(`.duel${side}`).classList.toggle("win", isWin);
+			if (isWin) {
+				duel.dataset.winner = i;
+			}
+		});
+
+		const matchIndex = duel.dataset.matchIndex;
+		if (matchIndex === undefined) {
+			return;
+		}
+		const teamWins = [0, 0];
+		for (const matchDuel of document.querySelectorAll(`#dfGamesList .duel[data-match-index="${matchIndex}"]`)) {
+			if (matchDuel.dataset.winner) {
+				teamWins[matchDuel.dataset.winner]++;
+			}
+		}
+		["home", "away"].forEach((side, i) => {
+			const isWin = teamWins[i] >= duel.dataset.nMatches/2;
+			const scoreEl = document.getElementById(`${matchIndex}-${side}Score`);
+			scoreEl.innerText = teamWins[i];
+			scoreEl.classList.toggle("win", isWin);
+			document.getElementById(`${matchIndex}-${side}`).classList.toggle("win", isWin);
+		});
+	}
+
+	function toggleExclusion(result) {
+		const tableId = result.dataset.tableId;
+		if (result.classList.toggle("excluded")) {
+			excludedTables.add(tableId);
+		} else {
+			excludedTables.delete(tableId);
+		}
+		saveDataToLocalStorage();
+		updateScores(result.closest(".duel"));
 	}
 
 	function saveHomePlayersToLocalStorage() {
@@ -1217,8 +1260,8 @@
 	function saveDataToLocalStorage() {
 		let dfData = new Map();
 		dfData.set("datePicker", document.getElementById("datePicker").value);
-		dfData.set("hidePremature", document.getElementById("hidePremature").checked);
 		dfData.set("dfConfig", document.getElementById("dfConfig").value);
+		dfData.set("excludedTables", [...excludedTables]);
 		dfData.set("lastSaved", Date.now());
 		localStorage.setItem("dfData", JSON.stringify([...dfData]));
 		console.debug("dfData saved to localStorage");
@@ -1227,13 +1270,13 @@
 	function retrieveDataFromLocalStorage() {
 		if (localStorage.dfData) {
 			const dfData = new Map(JSON.parse(localStorage.dfData));
-			document.getElementById("hidePremature").checked = eval(dfData.get("hidePremature"));
 			const duelData = dfData.get("dfConfig") ?? "";
 			document.getElementById("dfConfig").value = duelData;
 			console.debug("dfData retrieved from localStorage");
 			const lastSaved = dfData.get("lastSaved");
 			if (Date.now() - lastSaved < DATA_CACHE_DURATION) {
 				document.getElementById("datePicker").value = dfData.get("datePicker");
+				excludedTables = new Set(dfData.get("excludedTables"));
 				console.debug("Reloading retrieved dfData");
 				document.getElementById("dfFindButton").click();
 				applyBoxLayout();
