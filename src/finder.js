@@ -13,8 +13,7 @@
 	const CACHE_DURATION = 7*24*60*60*1000; // 7d in ms
 	const DATA_CACHE_DURATION = 2*60*60*1000; // 2h in ms
 	const ENDGAME_THRESHOLD = 70; // %
-	let excludedTables = new Set();
-	let clockWinners = new Map();
+	let resultOverrides = new Map();
 	let flags = new Map([
 		["Afghanistan", "🇦🇫"],
 		["Albania", "🇦🇱"],
@@ -390,6 +389,9 @@
 		}
 		#dfBox li.result.excluded .bga-link {
 			text-decoration: line-through;
+		}
+		#dfBox li.result.overridden .bga-link {
+			text-decoration: underline dotted;
 		}
 		span.progress {
 			grid-column: 3 span;
@@ -1070,9 +1072,6 @@
 					const result = document.createElement("li");
 					result.classList = "result";
 					result.dataset.tableId = game.id;
-					if (excludedTables.has(String(game.id))) {
-						result.classList.add("excluded");
-					}
 					const gameLink = document.createElement("a");
 					const dateSpan = document.createElement("span");
 					dateSpan.classList.add("resultDate");
@@ -1107,9 +1106,8 @@
 						gameLink.appendChild(awayScore);
 						if (game.clockViolations.length == 2) {
 							result.classList.add("doubleClock");
-							setResultWinner(result, clockWinners.get(String(game.id)));
 						} else {
-							setResultWinner(result, game.rank0 == 1 ? 0 : 1);
+							result.dataset.defaultWinner = game.rank0 == 1 ? 0 : 1;
 						}
 					}
 					if (game.flags) {
@@ -1118,6 +1116,7 @@
 						flagsSpan.innerText = game.flags;
 						result.appendChild(flagsSpan);
 					}
+					applyOverride(result);
 					duelGamesList.appendChild(result);
 				}
 				const duel = document.createElement("li");
@@ -1216,28 +1215,46 @@
 		result.querySelector(".awayScore").classList.toggle("win", winner === 1);
 	}
 
+	function getDefaultWinner(result) {
+		const winner = result.dataset.defaultWinner;
+		return winner === undefined ? undefined : Number(winner);
+	}
+
 	/**
-	 * Toggle exclusion of a result.
+	 * Apply a manual override ("excluded" or winner index) to a result.
+	 */
+	function applyOverride(result) {
+		const override = resultOverrides.get(result.dataset.tableId);
+		const isWinnerOverride = override === 0 || override === 1;
+		result.classList.toggle("excluded", override === "excluded");
+		result.classList.toggle("overridden", isWinnerOverride);
+		if (result.querySelector(".homeScore")) {
+			setResultWinner(result, isWinnerOverride ? override : getDefaultWinner(result));
+		}
+	}
+
+	/**
+	 * Cycle the override of a result: none → excluded → winner flipped.
+	 * Flipping covers clock violations missed once BGA's replay quota is hit.
 	 * BGA doesn't rank games with clock violations by both players correctly
-	 * (first violation should lose), so their winner is cycled instead:
-	 * undecided → home → away
+	 * (first violation should lose), so they cycle: undecided → home → away
 	 */
 	function toggleResult(result) {
 		const tableId = result.dataset.tableId;
+		const defaultWinner = getDefaultWinner(result);
+		let states = [undefined, "excluded"];
 		if (result.classList.contains("doubleClock")) {
-			const states = [undefined, 0, 1];
-			const winner = states[(states.indexOf(clockWinners.get(tableId)) + 1) % states.length];
-			if (winner === undefined) {
-				clockWinners.delete(tableId);
-			} else {
-				clockWinners.set(tableId, winner);
-			}
-			setResultWinner(result, winner);
-		} else if (result.classList.toggle("excluded")) {
-			excludedTables.add(tableId);
-		} else {
-			excludedTables.delete(tableId);
+			states = [undefined, 0, 1];
+		} else if (defaultWinner !== undefined) {
+			states.push(1 - defaultWinner);
 		}
+		const state = states[(states.indexOf(resultOverrides.get(tableId)) + 1) % states.length];
+		if (state === undefined) {
+			resultOverrides.delete(tableId);
+		} else {
+			resultOverrides.set(tableId, state);
+		}
+		applyOverride(result);
 		saveDataToLocalStorage();
 		updateScores(result.closest(".duel"));
 	}
@@ -1288,8 +1305,7 @@
 		let dfData = new Map();
 		dfData.set("datePicker", document.getElementById("datePicker").value);
 		dfData.set("dfConfig", document.getElementById("dfConfig").value);
-		dfData.set("excludedTables", [...excludedTables]);
-		dfData.set("clockWinners", [...clockWinners]);
+		dfData.set("resultOverrides", [...resultOverrides]);
 		dfData.set("lastSaved", Date.now());
 		localStorage.setItem("dfData", JSON.stringify([...dfData]));
 		console.debug("dfData saved to localStorage");
@@ -1304,8 +1320,7 @@
 			const lastSaved = dfData.get("lastSaved");
 			if (Date.now() - lastSaved < DATA_CACHE_DURATION) {
 				document.getElementById("datePicker").value = dfData.get("datePicker");
-				excludedTables = new Set(dfData.get("excludedTables"));
-				clockWinners = new Map(dfData.get("clockWinners"));
+				resultOverrides = new Map(dfData.get("resultOverrides"));
 				console.debug("Reloading retrieved dfData");
 				document.getElementById("dfFindButton").click();
 				applyBoxLayout();
