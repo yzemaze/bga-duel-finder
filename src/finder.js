@@ -393,6 +393,12 @@
 		#dfBox li.result.overridden .bga-link {
 			text-decoration: underline dotted;
 		}
+		li.result .flipClock {
+			display: none;
+		}
+		li.result.overridden .flipClock {
+			display: inline;
+		}
 		span.progress {
 			grid-column: 3 span;
 		}
@@ -1110,12 +1116,17 @@
 							result.dataset.defaultWinner = game.rank0 == 1 ? 0 : 1;
 						}
 					}
-					if (game.flags) {
-						const flagsSpan = document.createElement("span");
-						flagsSpan.classList.add("flags");
-						flagsSpan.innerText = game.flags;
-						result.appendChild(flagsSpan);
+					const flagsSpan = document.createElement("span");
+					flagsSpan.classList.add("flags");
+					flagsSpan.innerText = game.flags;
+					if (game.clockViolations?.length === 0) {
+						// a flipped winner implies an undetected clock violation of the original winner
+						const flipClock = document.createElement("span");
+						flipClock.classList.add("flipClock");
+						flipClock.innerText = " ⏰ ";
+						flagsSpan.appendChild(flipClock);
 					}
+					result.appendChild(flagsSpan);
 					applyOverride(result);
 					duelGamesList.appendChild(result);
 				}
