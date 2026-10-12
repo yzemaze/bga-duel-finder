@@ -699,11 +699,9 @@
 			const dfMessages = document.getElementById("dfMessages");
 			dfMessages.innerText = "";
 
-			// Normalize dates to compare only year, month, and day
-			configuredDate.setHours(0, 0, 0, 0);
-			today.setHours(0, 0, 0, 0);
-
-			if (configuredDate.getTime() !== today.getTime()) {
+			// date input values are parsed as UTC midnight, so compare with local today as UTC midnight
+			const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+			if (configuredDate.getTime() !== todayUtc) {
 				dfMessages.innerText = "Configured date is not today! Reloading …";
 				dfMessages.style.display = "block";
 				setTimeout(() => {
